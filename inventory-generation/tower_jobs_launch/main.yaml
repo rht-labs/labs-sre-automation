@@ -1,103 +1,86 @@
 ---
-- name: Initialize Ansible Tower scheduled notification project, job template, inventory and schedules
-  hosts: tower_jobs_launch
-  gather_facts: false
-  environment:
-    TOWER_HOST: "{{ ansible_tower_url }}"
-    TOWER_PASSWORD: "{{ ansible_tower_admin_password }}"
-    TOWER_USERNAME: "{{ ansible_tower_admin_username | default('admin') }}"
-    TOWER_VERIFY_SSL: "{{ ansible_tower_validate_certs | default(false) }}"
-
+- hosts: all
   tasks:
-    - name: "Fail If Working Directory Is Not Provided"
+    - name: 'Fail If Working Directory Is Not Provided'
       fail:
-        msg: "directory var needs to be provided in order to ensure a safe working directory"
+        msg: 'directory var needs to be provided in order to ensure a safe working directory'
       when:
         - directory is undefined or (directory | trim) == ""
 
     - name: Read Engagement Data
       include_vars:
-        file: "{{ directory }}/engagement.json"
+        file: '{{ directory }}/engagement.json'
 
-    - name: Create residency notifications
-      block:
-        - name: Combine customer and engagement name
-          set_fact:
-            customer_engagement: "{{ customer_name | lower | replace(' ', '_') }}-{{ project_name | lower | replace(' ', '_') }}"
-            
-        - name: Create a valid SCM credential from a private_key file
-          tower_credential:
-            name: "{{ scm_credential_name }}"
-            organization: "{{ organization }}"
-            kind: scm
-            ssh_key_data: "{{ lookup('file', ssh_key_data_path) }}"
-            state: present
+    - name: Set customer engagement
+      set_fact:
+        customer_engagement: "{{ customer_name | lower | replace(' ', '_') }}-{{ project_name | lower | replace(' ', '_') }}"
 
-        - name: "Create the {{ customer_engagement }}-project"
-          tower_project:    
-            name: "{{ customer_engagement }}-project"
-            description: "Create project for {{ customer_engagement }}"
-            organization: "{{ organization }}"
-            scm_type: "git"
-            scm_url: "{{ url }}"
-            scm_branch: "master"
-            scm_credential: "{{ scm_credential_name }}"
-            scm_update_on_launch: true
-            state: present
-          
-        - name: "Create an inventory for {{ customer_engagement }}"
-          tower_inventory:
-            name: "{{ customer_engagement }}-tower_jobs_launch"
-            description: "Inventory for {{ customer_engagement }}"
-            organization: "{{ organization }}"
-            state: present
-
-        - name: "Add an inventory source with notification templates for {{ customer_engagement }}"
-          tower_inventory_source:
-            name: "{{ customer_engagement }}-notifications"
-            description: Source for {{ customer_engagement }}-notifications
-            inventory: "{{ customer_engagement }}-tower_jobs_launch"
-            source: scm
-            source_project: "{{ customer_engagement }}-project"
-            credential: "{{ scm_credential_name }}"
-            source_path: iac/inventories/notifications/inventory
-            update_on_launch: yes
-            state: present
-
-        - name: "Add an inventory source to initialize scheduled notifications for {{ customer_engagement }}"
-          tower_inventory_source:
-            name: "{{ customer_engagement }}-tower_jobs_schedules"
-            description: Source for {{ customer_engagement }}-schedules
-            inventory: "{{ customer_engagement }}-tower_jobs_launch"
-            source: scm
-            source_project: "{{ customer_engagement }}-project"
-            credential: "{{ scm_credential_name }}"
-            source_path: iac/inventories/tower_jobs_schedules/inventory
-            update_on_launch: yes
-            state: present
-
-        - name: Create generic job template to configure Tower
-          tower_job_template:
-            name: "configure-ansible-tower"
-            job_type: "run"
-            inventory: "empty-inventory"
-            project: "infra-ansible"
-            playbook: "playbooks/ansible/tower/configure-ansible-tower.yml"
-            ask_inventory: yes
-            state: "present"
-
-        - name: "Launch job to configure Tower for {{ customer_engagement }}"
-          tower_job_launch:
-            job_template: "configure-ansible-tower"
-            inventory: "{{ customer_engagement }}-tower_jobs_launch"
-          register: job
-          
-        - name: "Print job ID details"
-          debug:
-            msg: "Job launched: {{ ansible_tower_url }}/#/jobs/playbook/{{ job.id }}"
-          
-      when:  
-        - start_date is defined 
+    - name: Set facts to bootstrap scheduled notifications into Ansible Tower
+      set_fact:
+        delete_missing_items: false
+        ansible_tower:
+          url: '{{ ansible_tower_url }}'
+          admin_user: '{{ ansible_tower_admin_username }}'
+          admin_password: '{{ ansible_tower_admin_password }}'
+          credentials:
+            - name: '{{ scm_credential_name }}'
+              organization: '{{ organization }}'
+              credential_type: Source Control
+              ssh_key_data: "{{ lookup('file', ssh_key_data_path) }}"
+          projects:
+            - name: '{{ customer_engagement }}-project'
+              description: 'Create project for {{ customer_engagement }}'
+              organization: '{{ organization }}'
+              scm_type: git
+              scm_url: '{{ url }}'
+              scm_branch: master
+              scm_credential_name: '{{ scm_credential_name }}'
+              scm_update_on_launch: true
+          inventories:
+            - name: '{{ customer_engagement }}-tower_jobs_launch'
+              description: 'Inventory for {{ customer_engagement }}'
+              organization: '{{ organization }}'
+              variables: ''
+              hosts:
+                - name: localhost
+                  variables: |-
+                    ---
+                    ansible_connection: local
+              sources:
+                - name: '{{ customer_engagement }}-notifications'
+                  description: Source for {{ customer_engagement }}-notifications
+                  inventory: '{{ customer_engagement }}-tower_jobs_launch'
+                  source: scm
+                  source_project: '{{ customer_engagement }}-project'
+                  credential: '{{ scm_credential_name }}'
+                  source_path: iac/inventories/tower_jobs_schedules/inventory
+                  update_on_launch: true
+                  source_vars: |-
+                    ---
+                - name: '{{ customer_engagement }}-tower_jobs_schedules'
+                  description: Source for {{ customer_engagement }}-notifications
+                  inventory: '{{ customer_engagement }}-tower_jobs_launch'
+                  source: scm
+                  source_project: '{{ customer_engagement }}-project'
+                  credential: '{{ scm_credential_name }}'
+                  source_path: iac/inventories/notifications/inventory
+                  update_on_launch: true
+                  source_vars: |-
+                    ---
+          job_templates:
+            - name: '{{ customer_engagement }}-configure-ansible-tower'
+              description: Configure Ansible Tower
+              inventory: '{{ customer_engagement }}-tower_jobs_launch'
+              project: infra-ansible
+              playbook: playbooks/ansible/tower/configure-ansible-tower.yml
+              ask_inventory: yes
+          launch_jobs:
+            - name: Launch Tower Job to configure Scheduled Notifications
+              job_template: '{{ customer_engagement }}-configure-ansible-tower'
+      when:
+        - start_date is defined
         - (hosting_environments is defined) and (hosting_environments | length > 0)
         - engagement_type | default('') == 'Residency'
-        - (archive_date | default('2006-01-02T15:04:05.000Z') | to_datetime('%Y-%m-%dT%H:%M:%S.%fZ')).strftime('%s') > now(utc=true).strftime('%s')  
+        - (archive_date | default('2006-01-02T15:04:05.000Z') | to_datetime('%Y-%m-%dT%H:%M:%S.%fZ')).strftime('%s') > now(utc=true).strftime('%s')
+
+- import_playbook: '{{ infra_ansible_directory }}/playbooks/ansible/tower/configure-ansible-tower.yml'

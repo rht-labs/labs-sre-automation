@@ -1,2 +1,9 @@
 [tower_jobs_launch]
 localhost
+
+[ansible-tower]
+localhost
+
+[tower-management-host:children]
+ansible-tower
+
