@@ -26,7 +26,8 @@
             - name: '{{ scm_credential_name }}'
               organization: '{{ organization }}'
               credential_type: Source Control
-              ssh_key_data: "{{ lookup('file', ssh_key_data_path) }}"
+              inputs:
+                ssh_key_data: "{{ lookup('file', ssh_key_data_path) }}"
           projects:
             - name: '{{ customer_engagement }}-project'
               description: 'Create project for {{ customer_engagement }}'
