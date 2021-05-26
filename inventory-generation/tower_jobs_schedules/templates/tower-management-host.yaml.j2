@@ -4,7 +4,7 @@ start_date: "{{ (start_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%
 end_date: "{{ (end_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
 archive_date: "{{ (archive_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
 
-timezone: "{{ timezone | default('UTC') }}"
+timezone: "{{ timezone | default("UTC") }}"
 
 delete_missing_items: false
 
@@ -56,7 +56,7 @@ ansible_tower:
     - name: "{{ customer_engagement }}-welcome-internal"
       description: "Welcome Internal for internal {{ company_name }} engagement members"
       {% raw -%}
-      rrule: "{{ start_date | parse_datetime | replace_datetime(hour=5) | to_rrule(timezone={{ timezone }}) }}"
+      rrule: "{{ start_date | parse_datetime | replace_datetime(hour=5) | to_rrule(timezone=timezone) }}"
       {%- endraw %}
       unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
       enabled: {{ enable_notifications | default(false) }}
@@ -67,7 +67,7 @@ ansible_tower:
     - name: "{{ customer_engagement }}-welcome-all"
       description: "Welcome notification for {{ company_name }} and {{ customer_name }}"
       {% raw -%}
-      rrule: "{{ start_date | parse_datetime | replace_datetime(hour=5) | to_rrule(timezone={{ timezone }}) }}"
+      rrule: "{{ start_date | parse_datetime | replace_datetime(hour=5) | to_rrule(timezone=timezone) }}"
       {%- endraw %}
       unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
       enabled: {{ enable_notifications | default(false) }}
@@ -78,7 +78,7 @@ ansible_tower:
     - name: "{{ customer_engagement }}-pre-offboard"
       description: "Pre-offboard"
       {% raw -%}
-      rrule: "{{ end_date | parse_datetime | replace_datetime(hour=5) | subtract_time(weeks=1) | to_rrule(timezone={{ timezone }}) }}"
+      rrule: "{{ end_date | parse_datetime | replace_datetime(hour=5) | subtract_time(weeks=1) | to_rrule(timezone=timezone) }}"
       {%- endraw %}
       unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
       enabled: {{ enable_notifications | default(false) }}
@@ -89,7 +89,7 @@ ansible_tower:
     - name: "{{ customer_engagement }}-offboard-1"
       description: "Offboard 1"
       {% raw -%}
-      rrule: "{{ end_date | parse_datetime | replace_datetime(hour=5) | add_time(days=3) | to_rrule(timezone={{ timezone }}) }}"
+      rrule: "{{ end_date | parse_datetime | replace_datetime(hour=5) | add_time(days=3) | to_rrule(timezone=timezone) }}"
       {%- endraw %}
       unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
       enabled: {{ enable_notifications | default(false) }}
@@ -100,7 +100,7 @@ ansible_tower:
     - name: "{{ customer_engagement }}-offboard-2"
       description: "Offboard 2"
       {% raw -%}
-      rrule: "{{ archive_date | parse_datetime | replace_datetime(hour=5) | subtract_time(weeks=3) | to_rrule(timezone={{ timezone }}) }}"
+      rrule: "{{ archive_date | parse_datetime | replace_datetime(hour=5) | subtract_time(weeks=3) | to_rrule(timezone=timezone) }}"
       {%- endraw %}
       unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
       enabled: {{ enable_notifications | default(false) }}
@@ -111,7 +111,7 @@ ansible_tower:
     - name: "{{ customer_engagement }}-offboard-3"
       description: "Offboard 3"
       {% raw -%}
-      rrule: "{{ archive_date | parse_datetime | replace_datetime(hour=5) | subtract_time(weeks=2) | to_rrule(timezone={{ timezone }}) }}"
+      rrule: "{{ archive_date | parse_datetime | replace_datetime(hour=5) | subtract_time(weeks=2) | to_rrule(timezone=timezone) }}"
       {%- endraw %}
       unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
       enabled: {{ enable_notifications | default(false) }}
@@ -122,7 +122,7 @@ ansible_tower:
     - name: "{{ customer_engagement }}-shutoff"
       description: "Shutoff e-mail for the {{ customer_engagement }} engagement"
       {% raw -%}
-      rrule: "{{ archive_date | parse_datetime | replace_datetime(hour=5) | to_rrule(timezone={{ timezone }}) }}"
+      rrule: "{{ archive_date | parse_datetime | replace_datetime(hour=5) | to_rrule(timezone=timezone) }}"
       {%- endraw %}
       unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
       enabled: {{ enable_notifications | default(false) }}
