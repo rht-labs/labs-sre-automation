@@ -4,6 +4,8 @@ start_date: "{{ (start_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%
 end_date: "{{ (end_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
 archive_date: "{{ (archive_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
 
+timezone: "{{ timezone | default('UTC') }}"
+
 delete_missing_items: false
 
 ansible_tower:
