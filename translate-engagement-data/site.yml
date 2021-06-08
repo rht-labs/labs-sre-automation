@@ -9,9 +9,9 @@
         file: "{{ directory }}/engagement.json"
     - name: Verify governor_type is specified
       fail:
-        msg: "Please verify that a governor_type has been specified in your inventory"
+        msg: "Please verify that a governor_type and governor_spec has been specified in your inventory"
       when:
-        - governor_type is not defined
+        - governor_type is not defined or governor_spec is not defined
     - block:
       - name: Set fact used to check if a hosting environment is needed
         set_fact:
