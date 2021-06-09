@@ -11,7 +11,7 @@
       fail:
         msg: "Please verify that a governor_type and governor_spec has been specified in your inventory"
       when:
-        - governor_type is not defined or governor_spec is not defined
+        - (governor_type is undefined or (governor_type | trim) == "") or (governor_spec is undefined or (governor_spec | trim) == "")
     - block:
       - name: Set fact used to check if a hosting environment is needed
         set_fact:

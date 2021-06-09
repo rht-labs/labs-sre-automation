@@ -15,7 +15,7 @@
     fail:
       msg: "governor_type and governor_spec vars need to be provided in order to indicate babylon workflow"
     when:
-      - (governor_type is undefined or (governor_name | trim) == "") or (governor_spec is undefined or (governor_spec | trim) == "")
+      - (governor_type is undefined or (governor_type | trim) == "") or (governor_spec is undefined or (governor_spec | trim) == "")
 
   - name: Generate Timestamp
     set_fact:
