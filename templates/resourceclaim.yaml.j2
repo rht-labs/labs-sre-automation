@@ -3,7 +3,7 @@
 apiVersion: poolboy.gpte.redhat.com/v1
 kind: ResourceClaim
 metadata:
-  name: {{ governor_name }}-{{ project_id }}{% if inv_ts is defined %}-{{ inv_ts | trim }}{% endif %}
+  name: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower ) }}-{{ project_id }}{% if inv_ts is defined %}-{{ inv_ts | trim }}{% endif %}
 spec:
   resources:
   - template:
@@ -12,7 +12,7 @@ spec:
       metadata:
         annotations:
           poolboy.gpte.redhat.com/resource-provider-name: babylon
-        generateName: {{ governor_name }}-{{ claim_postfix | default("") }}
+        generateName: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower) }}-{{ claim_postfix | default("") }}
         labels:
           governor: "{{ (engagement_type | lower) +'.' + (governor_type | lower) + '.' + (governor_spec | lower) }}"
       spec:
