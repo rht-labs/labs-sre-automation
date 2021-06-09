@@ -11,11 +11,11 @@
     when:
       - directory is undefined or (directory | trim) == ""
 
-  - name: "Fail If Governor Name Is Not Provided"
+  - name: "Fail If Governor Type Is Not Provided"
     fail:
-      msg: "governor_name var needs to be provided in order to indicate babylon workflow"
+      msg: "governor_type and governor_spec vars need to be provided in order to indicate babylon workflow"
     when:
-      - governor_name is undefined or (governor_name | trim) == ""
+      - (governor_type is undefined or (governor_name | trim) == "") or (governor_spec is undefined or (governor_spec | trim) == "")
 
   - name: Generate Timestamp
     set_fact:

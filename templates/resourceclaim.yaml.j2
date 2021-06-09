@@ -14,9 +14,9 @@ spec:
           poolboy.gpte.redhat.com/resource-provider-name: babylon
         generateName: {{ governor_name }}-{{ claim_postfix | default("") }}
         labels:
-          governor: {{ governor_name }}
+          governor: "{{ (engagement_type | lower) +'.' + (governor_type | lower) + '.' + (governor_spec | lower) }}"
       spec:
-        governor: {{ governor_name }}
+        governor: "{{ (engagement_type | lower) +'.' + (governor_type | lower) + '.' + (governor_spec | lower) }}"
         vars:
           job_vars:
             {{ claim_content | to_nice_yaml | indent(12) }}

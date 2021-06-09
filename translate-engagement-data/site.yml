@@ -7,6 +7,11 @@
     - name: Read Engagement Data
       include_vars:
         file: "{{ directory }}/engagement.json"
+    - name: Verify governor_type is specified
+      fail:
+        msg: "Please verify that a governor_type and governor_spec has been specified in your inventory"
+      when:
+        - governor_type is not defined or governor_spec is not defined
     - block:
       - name: Set fact used to check if a hosting environment is needed
         set_fact:
@@ -22,9 +27,6 @@
           file:
             path: "{{ directory }}/ocp-init"
             state: directory
-        - name: Assemble Anarchy Governor Name
-          set_fact:
-            governor_name: "{{ 'labs.ocp4.' + (engagement_region | default('dev-1') | lower) }}"
         - name: Create Resource Claim
           vars:
             claim_content:
