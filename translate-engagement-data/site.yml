@@ -24,7 +24,7 @@
             state: directory
         - name: Assemble Anarchy Governor Name
           set_fact:
-            governor_name: "{{ engagement_type }}.ocp4.{{ engagement_region | default('dev-1') | lower }}
+            governor_name: "{{ engagement_type }}.ocp4.{{ engagement_region | default('dev-1') | lower }}"
         - name: Create Resource Claim
           vars:
             claim_content:
