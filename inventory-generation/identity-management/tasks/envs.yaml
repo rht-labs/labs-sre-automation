@@ -1,0 +1,72 @@
+---
+
+- block:
+  - name: "Set IDM facts"
+    set_fact:
+      ipa_host: "{{ 'ipa.apps.' + (hosting_env.ocp_sub_domain | lower) + '.' + engagement_region | default('dev') + '-1.' + ocp_base_url }}"
+      ipa_admin_user: "{{ ocp_admin_username }}"
+      ipa_admin_password: "{{ ocp_admin_password }}"
+      ipa_validate_certs: "{{ ipa_validate_certs | default(true) }}"
+
+  - name: "Assemble inventory"
+    set_fact:
+      claim_content:
+        env_end_date: "{{ (archive_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
+        end_date: "{{ (end_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
+        start_date: "{{ (start_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
+        customer_name: "{{ customer_name }}"
+        project_name: "{{ project_name }}"
+        ipa_validate_certs: "{{ ipa_validate_certs }}"
+        ipa_host: "{{ ipa_host }}"
+        ipa_admin_user: "{{ ipa_admin_user }}"
+        ipa_admin_password: "{{ ipa_admin_password }}"
+        list_of_mail_cc: "{{ cc_list }}"
+        lodestar_identities:
+          users: "{{ users }}"
+          groups: "{{ usrgrp }}"
+
+  - name: "Check For Existing Inventory File"
+    stat:
+      path: "{{ directory }}/iac/inventories/identity-management/inventory/host_vars/{{ hosting_env.ocp_sub_domain }}.yml"
+    register: existing_inv
+
+  - name: "Pull existing inventory vars"
+    include_vars:
+      file: "{{ directory }}/iac/inventories/identity-management/inventory/host_vars/{{ hosting_env.ocp_sub_domain }}.yml"
+      name: existing_inv_contents
+    when:
+      - existing_inv.stat.exists
+
+  - name: "Diff existing vars with new inventory"
+    set_fact:
+      inv_has_diff: true
+    when:
+      - (existing_inv.stat.exists and existing_inv_contents is defined and existing_inv_contents != (claim_content | from_yaml)) or not existing_inv.stat.exists
+
+  - name: "Ensure path exists"
+    file:
+      state: "directory"
+      path: "{{ directory }}/iac/inventories/identity-management/inventory/host_vars"
+
+  - name: "Write inventory to file"
+    copy:
+      content: "{{ claim_content | to_nice_yaml(indent=2) }}"
+      dest: "{{ directory }}/iac/inventories/identity-management/inventory/host_vars/{{ hosting_env.ocp_sub_domain }}.yml"
+    when:
+      - (inv_has_diff is defined and inv_has_diff is true) or not existing_inv.stat.exists
+
+  - name: "Create hosts file"
+    copy:
+      content: "[identity-hosts]\nlocalhost"
+      dest: "{{ directory }}/iac/inventories/identity-management/inventory/hosts"
+    when:
+      - (inv_has_diff is defined and inv_has_diff is true) or not existing_inv.stat.exists
+
+  - name: "Create ResourceClaim"
+    copy:
+      content: "{{ lookup('template', inventory_dir + '/../files/templates/resourceclaim.yaml.j2') }}"
+      dest: "{{ directory }}/ocp-init/id-mgmt-{{ (hosting_env.ocp_sub_domain |  trim) | lower }}-{{ inv_ts | trim }}.yaml"
+    when:
+      - (inv_has_diff is defined and inv_has_diff is true)
+  when:
+    - hosting_env.ocp_sub_domain is defined

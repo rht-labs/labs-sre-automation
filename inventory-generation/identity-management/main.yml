@@ -58,74 +58,11 @@
     set_fact:
       cc_list: "{{ ', '.join(( '{{ engagement_lead_email }}', '{{ technical_lead_email }}' )) }}"
 
-  #####################################################################################################################
-  # Right now, the only supported configuration is a list of one hosting environment.
-  # In the near future, this should be updated to support more than one, and this comment (and the code below)
-  # should be updated to support this. For now, this checking is just looking for more than zero hosting environments,
-  # but will default to use the value(s) from the first one.
-
   - block:
-    - name: "Set IDM facts"
-      set_fact:
-        ipa_host: "{{ 'ipa.apps.' + (hosting_environments[0].ocp_sub_domain | lower) + '.' + engagement_region | default('dev') + '-1.' + ocp_base_url }}"
-        ipa_admin_user: "{{ ocp_admin_username }}"
-        ipa_admin_password: "{{ ocp_admin_password }}"
-        ipa_validate_certs: "{{ ipa_validate_certs | default(true) }}"
-
-    - name: "Assemble inventory"
-      set_fact:
-        claim_content:
-          env_end_date: "{{ (archive_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
-          end_date: "{{ (end_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
-          start_date: "{{ (start_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
-          customer_name: "{{ customer_name }}"
-          project_name: "{{ project_name }}"
-          ipa_validate_certs: "{{ ipa_validate_certs }}"
-          ipa_host: "{{ ipa_host }}"
-          ipa_admin_user: "{{ ipa_admin_user }}"
-          ipa_admin_password: "{{ ipa_admin_password }}"
-          list_of_mail_cc: "{{ cc_list }}"
-          lodestar_identities:
-            users: "{{ users }}"
-            groups: "{{ usrgrp }}"
-
-    - name: "Check For Existing Inventory File"
-      stat:
-        path: "{{ directory }}/iac/inventories/identity-management/inventory/group_vars/all.yml"
-      register: existing_inv
-
-    - name: "Pull existing inventory vars"
-      include_vars:
-        file: "{{ directory }}/iac/inventories/identity-management/inventory/group_vars/all.yml"
-        name: existing_inv_contents
-      when:
-        - existing_inv.stat.exists
-
-    - name: "Diff existing vars with new inventory"
-      set_fact:
-        inv_has_diff: true
-      when:
-        - existing_inv.stat.exists
-        - existing_inv_contents is defined
-        - existing_inv_contents != (claim_content | from_yaml)
-
-    - name: "Write inventory to file"
-      copy:
-        content: "{{ claim_content | to_nice_yaml(indent=2) }}"
-        dest: "{{ directory }}/iac/inventories/identity-management/inventory/group_vars/all.yml"
-
-    - name: "Create hosts file"
-      copy:
-        content: "[identity-hosts]\nlocalhost"
-        dest: "{{ directory }}/iac/inventories/identity-management/inventory/hosts"
-
-    - name: "Create ResourceClaim"
-      copy:
-        content: "{{ lookup('template', inventory_dir + '/../files/templates/resourceclaim.yaml.j2') }}"
-        dest: "{{ directory }}/ocp-init/id-mgmt-{{ inv_ts | trim }}.yaml"
-      when:
-        - (inv_has_diff is defined and inv_has_diff is true) or not existing_inv.stat.exists
+      - include_tasks: tasks/envs.yaml
+        with_items: "{{ hosting_environments }}"
+        loop_control:
+          loop_var: hosting_env 
     when:
       - hosting_environments is defined
       - hosting_environments|length > 0
-      - hosting_environments[0].ocp_sub_domain is defined
