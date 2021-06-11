@@ -31,6 +31,6 @@
           ocp_subdomain: "{{ hosting_env.ocp_sub_domain }}"
       copy:
         content: "{{ lookup('template', inventory_dir + '/../files/templates/resourceclaim.yaml.j2') }}"
-        dest: "{{ directory }}/ocp-init/cluster-init-{{ (hosting_env.environment_name |  trim) | regex_replace(' ','-') | lower }}.yaml"
+        dest: "{{ directory }}/ocp-init/cluster-init-{{ (hosting_env.ocp_sub_domain |  trim) | lower }}.yaml"
   when:
     - ocp_cloud_provider_name|trim != 'other'
