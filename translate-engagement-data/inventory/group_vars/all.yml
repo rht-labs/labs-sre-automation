@@ -1,3 +1,5 @@
+---
+
 destination_namespace: argo-cd
 chart_path: "."
 target_revision: HEAD
