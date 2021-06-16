@@ -49,22 +49,22 @@
                     ansible_connection: local
               sources:
                 - name: '{{ customer_engagement }}-notifications'
-                  description: Source for {{ customer_engagement }}-notifications
-                  inventory: '{{ customer_engagement }}-tower_jobs_launch'
-                  source: scm
-                  source_project: '{{ customer_engagement }}-project'
-                  credential: '{{ scm_credential_name }}'
-                  source_path: iac/inventories/tower_jobs_schedules/inventory
-                  update_on_launch: true
-                  source_vars: |-
-                    ---
-                - name: '{{ customer_engagement }}-tower_jobs_schedules'
-                  description: Source for {{ customer_engagement }}-notifications
+                  description: 'Source for {{ customer_engagement }}-notifications'
                   inventory: '{{ customer_engagement }}-tower_jobs_launch'
                   source: scm
                   source_project: '{{ customer_engagement }}-project'
                   credential: '{{ scm_credential_name }}'
                   source_path: iac/inventories/notifications/inventory
+                  update_on_launch: true
+                  source_vars: |-
+                    ---
+                - name: '{{ customer_engagement }}-tower_jobs_schedules'
+                  description: 'Source for {{ customer_engagement }}-tower_jobs_schedules'
+                  inventory: '{{ customer_engagement }}-tower_jobs_launch'
+                  source: scm
+                  source_project: '{{ customer_engagement }}-project'
+                  credential: '{{ scm_credential_name }}'
+                  source_path: iac/inventories/tower_jobs_schedules/inventory
                   update_on_launch: true
                   source_vars: |-
                     ---
