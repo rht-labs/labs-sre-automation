@@ -75,6 +75,7 @@
               project: infra-ansible
               playbook: playbooks/ansible/tower/configure-ansible-tower.yml
               ask_inventory: yes
+              allow_simultaneous: false
           launch_jobs:
             - name: Launch Tower Job to configure Scheduled Notifications
               job_template: '{{ customer_engagement }}-configure-ansible-tower'
