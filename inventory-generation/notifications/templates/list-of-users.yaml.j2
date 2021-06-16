@@ -3,7 +3,7 @@
 full:
   list_of_users:
 {% for user in engagement_users | default([]) %}
-{% filter indent(width=6, indentfirst=False) %}
+{% filter indent(width=6, first=False) %}
     - {{ user | to_nice_yaml }}
 {%- endfilter %}
 {%- endfor %}
@@ -11,7 +11,7 @@ full:
 internal:
   list_of_users:
 {% for user in engagement_users | default([]) %}
-{% filter indent(width=6, indentfirst=False) %}
+{% filter indent(width=6, first=False) %}
 {% if 'redhat.com' in user.email %}
     - {{ user | to_nice_yaml }}
 {% endif %}
