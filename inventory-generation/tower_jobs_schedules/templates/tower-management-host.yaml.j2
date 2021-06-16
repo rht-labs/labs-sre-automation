@@ -12,7 +12,7 @@ ansible_tower:
   admin_password: "{{ ansible_tower_admin_password }}"
   projects:
     - name: "{{ customer_engagement }}-project"
-      description: "{{ description }}"
+      description: "Project for {{ customer_engagement }}"
       organization: "{{ organization }}"
       scm_type: "git"
       scm_url: "{{ url }}"
@@ -61,7 +61,7 @@ ansible_tower:
       extra_data:
         body: {% raw %}"{{ welcome_internal.body }}"{% endraw %}
         title: {% raw %}"{{ welcome_internal.title }}"{% endraw %}
-        list_of_users: {% raw %}"{{ internal.list_of_users }}"{% endraw %}
+        list_of_users: {% raw %}"{{ internal.list_of_users | default([]) }}"{% endraw %}
     - name: "{{ customer_engagement }}-welcome-all"
       description: "Welcome notification for {{ company_name }} and {{ customer_name }}"
       {% raw -%}
@@ -72,7 +72,7 @@ ansible_tower:
       extra_data:
         body: {% raw %}"{{ welcome_all.body }}"{% endraw %}
         title: {% raw %}"{{ welcome_all.title }}"{% endraw %}
-        list_of_users: {% raw %}"{{ full.list_of_users }}"{% endraw %}
+        list_of_users: {% raw %}"{{ full.list_of_users | default([]) }}"{% endraw %}
     - name: "{{ customer_engagement }}-pre-offboard"
       description: "Pre-offboard"
       {% raw -%}
@@ -83,7 +83,7 @@ ansible_tower:
       extra_data:
         body: {% raw %}"{{ pre_offboard.body }}"{% endraw %}
         title: {% raw %}"{{ pre_offboard.title }}"{% endraw %}
-        list_of_users: {% raw %}"{{ full.list_of_users }}"{% endraw %}
+        list_of_users: {% raw %}"{{ full.list_of_users | default([]) }}"{% endraw %}
     - name: "{{ customer_engagement }}-offboard-1"
       description: "Offboard 1"
       {% raw -%}
@@ -94,7 +94,7 @@ ansible_tower:
       extra_data:
         body: {% raw %}"{{ offboard_1.body }}"{% endraw %}
         title: {% raw %}"{{ offboard_1.title }}"{% endraw %}
-        list_of_users: {% raw %}"{{ full.list_of_users }}"{% endraw %}
+        list_of_users: {% raw %}"{{ full.list_of_users | default([]) }}"{% endraw %}
     - name: "{{ customer_engagement }}-offboard-2"
       description: "Offboard 2"
       {% raw -%}
@@ -105,7 +105,7 @@ ansible_tower:
       extra_data:
         body: {% raw %}"{{ offboard_2.body }}"{% endraw %}
         title: {% raw %}"{{ offboard_2.title }}"{% endraw %}
-        list_of_users: {% raw %}"{{ full.list_of_users }}"{% endraw %}
+        list_of_users: {% raw %}"{{ full.list_of_users | default([]) }}"{% endraw %}
     - name: "{{ customer_engagement }}-offboard-3"
       description: "Offboard 3"
       {% raw -%}
@@ -116,7 +116,7 @@ ansible_tower:
       extra_data:
         body: {% raw %}"{{ offboard_3.body }}"{% endraw %}
         title: {% raw %}"{{ offboard_3.title }}"{% endraw %}
-        list_of_users: {% raw %}"{{ full.list_of_users }}"{% endraw %}
+        list_of_users: {% raw %}"{{ full.list_of_users | default([]) }}"{% endraw %}
     - name: "{{ customer_engagement }}-shutoff"
       description: "Shutoff e-mail for the {{ customer_engagement }} engagement"
       {% raw -%}
@@ -127,4 +127,4 @@ ansible_tower:
       extra_data:
         body: {% raw %}"{{ shutoff.body }}"{% endraw %}
         title: {% raw %}"{{ shutoff.title }}"{% endraw %}
-        list_of_users: {% raw %}"{{ full.list_of_users }}"{% endraw %}
+        list_of_users: {% raw %}"{{ full.list_of_users | default([]) }}"{% endraw %}
