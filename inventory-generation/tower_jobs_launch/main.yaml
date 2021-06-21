@@ -36,7 +36,8 @@
               scm_url: '{{ url }}'
               scm_branch: master
               scm_credential_name: '{{ scm_credential_name }}'
-              scm_update_on_launch: true
+              scm_project_update: true
+              scm_project_update_wait: true
           inventories:
             - name: '{{ customer_engagement }}-tower_jobs_launch'
               description: 'Inventory for {{ customer_engagement }}'
