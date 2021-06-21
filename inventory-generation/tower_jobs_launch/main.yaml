@@ -36,7 +36,8 @@
               scm_url: '{{ url }}'
               scm_branch: master
               scm_credential_name: '{{ scm_credential_name }}'
-              scm_update_on_launch: true
+              scm_project_update: true
+              scm_project_update_wait: true
           inventories:
             - name: '{{ customer_engagement }}-tower_jobs_launch'
               description: 'Inventory for {{ customer_engagement }}'
@@ -55,7 +56,7 @@
                   source_project: '{{ customer_engagement }}-project'
                   credential: '{{ scm_credential_name }}'
                   source_path: iac/inventories/notifications/inventory
-                  update_on_launch: true
+                  update_on_project_update: true
                   source_vars: |-
                     ---
                 - name: '{{ customer_engagement }}-tower_jobs_schedules'
@@ -65,7 +66,7 @@
                   source_project: '{{ customer_engagement }}-project'
                   credential: '{{ scm_credential_name }}'
                   source_path: iac/inventories/tower_jobs_schedules/inventory
-                  update_on_launch: true
+                  update_on_project_update: true
                   source_vars: |-
                     ---
           job_templates:
