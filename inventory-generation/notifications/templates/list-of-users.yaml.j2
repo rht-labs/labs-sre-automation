@@ -14,7 +14,10 @@ internal:
 {% filter indent(width=6) %}
 {% if 'redhat.com' in user.email %}
     - {{ user | to_nice_yaml }}
-{% endif %}
+{%- endif %}
 {%- endfilter %}
 {%- endfor %}
 
+list_of_mail_cc:
+    - {{ engagement_lead_email }}
+    - {{ technical_lead_email }}
