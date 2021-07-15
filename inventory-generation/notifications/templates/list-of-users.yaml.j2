@@ -18,6 +18,17 @@ internal:
 {%- endfilter %}
 {%- endfor %}
 
+{%- set users = [] %}
+{% if engagement_lead_email is defined and engagement_lead_email|length %}
+{{ users.append(engagement_lead_email) }}
+{%- endif %}
+{% if technical_lead_email is defined and technical_lead_email|length %}
+{{ users.append(technical_lead_email) }}
+{%- endif %}
+
+{% if users %}
 list_of_mail_cc:
-    - {{ engagement_lead_email }}
-    - {{ technical_lead_email }}
+{% for user in users %}
+    - {{ user }}
+{% endfor %}
+{%- endif %}
