@@ -20,6 +20,7 @@
         delete_missing_items: false
         ansible_tower:
           url: '{{ ansible_tower_url }}'
+          validate_certs: '{{ validate_tower_certs | default(true) }}'
           admin_user: '{{ ansible_tower_admin_username }}'
           admin_password: '{{ ansible_tower_admin_password }}'
           credentials:

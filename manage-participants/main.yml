@@ -1,0 +1,51 @@
+---
+
+- hosts: localhost
+  name: Verify Identity Provider
+  tasks:
+
+    - name: Wait for IdM to be responsive
+      uri:
+        url: "https://{{ ipa_host }}/ipa/ui/"
+        validate_certs: "{{ ipa_validate_certs }}"
+      register: rc
+      until: rc.status|trim|int == 200
+      retries: 90
+      delay: 60
+      when:
+        - ipa_host is defined
+
+- name: Remove participants from IdM
+  import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
+  vars:
+    identities: "{{ lodestar_identities_remove }}"
+  when:
+    - lodestar_identities_remove is defined
+    - lodestar_identities_remove != []
+
+- name: Remove partitipants from queue
+  import_playbook: "process_queue.yml"
+  when:
+    - lodestar_identities_remove is defined
+    - lodestar_identities_remove != []
+
+- name: Add participants to IdM
+  import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
+  vars:
+    identities: "{{ lodestar_identities }}"
+
+- hosts: mail-host
+  gather_facts: false
+  tasks:
+    - name: "Include additional variables / inventory content"
+      include_vars:
+        file: "{{ item }}"
+      with_items: "{{ email_template | fileglob }}"
+
+- name: Notify users
+  import_playbook: "../../requirements_roles/infra-ansible/playbooks/notifications/email-notify-users.yml"
+  vars:
+    users: "{{ identities.users }}"
+
+- name: Update Anarchy with status
+  import_playbook: completion_callback.yml
