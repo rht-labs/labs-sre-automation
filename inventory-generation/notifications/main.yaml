@@ -27,12 +27,21 @@
             path: "{{ directory }}/iac/inventories/notifications/inventory/group_vars/all"
             state: directory
 
-        - name: "Copy email template directory to engagement repo and process as jinja2"
+        - name: "Copy email template directory to Residency Engagement repo and process as jinja2"
           template:
             src: "{{ item }}"
             dest: "{{ directory }}/iac/inventories/notifications/inventory/group_vars/all/{{ item | basename | regex_replace('.j2$') }}"
           with_fileglob:
             - "{{ email_templates_directory }}/hosting/residency/{{ language | default('en_us') }}/*.j2"
+          when: engagement_type | default('') == 'Residency'
+
+        - name: "Copy email template directory to DO500 Engagement repo and process as jinja2"
+          template:
+            src: "{{ item }}"
+            dest: "{{ directory }}/iac/inventories/notifications/inventory/group_vars/all/{{ item | basename | regex_replace('.j2$') }}"
+          with_fileglob:
+            - "{{ email_templates_directory }}/hosting/do500/{{ language | default('en_us') }}/*.j2"
+          when: engagement_type | default('') == 'DO500'
 
         - name: "Create hosts file"
           copy:
@@ -42,10 +51,10 @@
       when: 
         - notifications_dir.stat.exists is false
         - start_date is defined
-        - engagement_type | default('') == 'Residency'
+        - engagement_type | default('') == 'Residency' or engagement_type | default('') == 'DO500'
         - (hosting_environments is defined) and (hosting_environments | length > 0)
         - (archive_date | default('2006-01-02T15:04:05.000Z') | to_datetime('%Y-%m-%dT%H:%M:%S.%fZ')).strftime('%s') > now(utc=true).strftime('%s')
-        
+
     - name: "Process list of users from template"
       template:
         src: list-of-users.yaml.j2
