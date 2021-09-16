@@ -1,0 +1,103 @@
+#jinja2: trim_blocks:False
+---
+start_date: "{{ (start_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
+end_date: "{{ (end_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
+archive_date: "{{ (archive_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
+
+timezone: "{{ timezone | default("UTC") }}"
+
+delete_missing_items: false
+
+ansible_tower:
+  url: "{{ ansible_tower_url }}"
+  admin_username: "{{ ansible_tower_admin_username | default('admin') }}"
+  admin_password: "{{ ansible_tower_admin_password }}"
+  projects:
+    - name: "{{ customer_engagement }}-project"
+      description: "Project for {{ customer_engagement }}"
+      organization: "{{ organization }}"
+      scm_type: "git"
+      scm_url: "{{ url }}"
+      scm_branch: "master"
+      scm_credential_name: "{{ scm_credential_name }}"
+      scm_update_on_launch: true
+  job_templates:
+    - name: "{{ customer_engagement }}-email-notify-list-of-users"
+      description: "Job Template to send email notifications to users"
+      inventory: "{{ customer_engagement }}-tower-mail-host"
+      project: "infra-ansible"
+      playbook: "playbooks/notifications/email-notify-list-of-users.yml"
+      ask_variables_on_launch: true
+  inventories:
+    - name: "{{ customer_engagement }}-tower-mail-host"
+      variables: ""
+      organization: "{{ organization }}"
+      sources:
+        - name: "{{ customer_engagement }}-mail-host-credentials"
+          description: "Email credentials for infra-ansible/mail-host"
+          credential: "{{ scm_credential_name }}"
+          source_project: "{{ mail_host_source_project }}"
+          source: "scm"
+          source_path: "redhat.com/inventory/hosts"
+          update_on_launch: true
+          source_vars: |-
+            ---
+        - name: "{{ customer_engagement }}-notification-templates"
+          description: "Notification templates for {{ customer_engagement }}"
+          credential: "{{ scm_credential_name }}"
+          source_project: "{{ customer_engagement }}-project"
+          source: "scm"
+          source_path: "iac/inventories/notifications/inventory/hosts"
+          update_on_launch: true
+          source_vars: |-
+            ---
+
+  schedules:
+    - name: "{{ customer_engagement }}-welcome-internal"
+      description: "Welcome Internal for internal {{ company_name }} engagement members"
+      {% raw -%}
+      rrule: "{{ start_date | parse_datetime | replace_datetime(hour=5) | to_rrule(timezone=timezone) }}"
+      {%- endraw %}
+      unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
+      enabled: {{ enable_notifications | default(false) }}
+      extra_data:
+        body: {% raw %}"{{ welcome_internal.body }}"{% endraw %}
+        title: {% raw %}"{{ welcome_internal.title }}"{% endraw %}
+        list_of_users: {% raw %}"{{ internal.list_of_users | default([]) }}"{% endraw %}
+        list_of_mail_cc: {% raw %}"{{ list_of_mail_cc | default([]) }}"{% endraw %}
+    - name: "{{ customer_engagement }}-welcome-all"
+      description: "Welcome notification for {{ company_name }} and {{ customer_name }}"
+      {% raw -%}
+      rrule: "{{ start_date | parse_datetime | replace_datetime(hour=5) | to_rrule(timezone=timezone) }}"
+      {%- endraw %}
+      unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
+      enabled: {{ enable_notifications | default(false) }}
+      extra_data:
+        body: {% raw %}"{{ welcome_all.body }}"{% endraw %}
+        title: {% raw %}"{{ welcome_all.title }}"{% endraw %}
+        list_of_users: {% raw %}"{{ full.list_of_users | default([]) }}"{% endraw %}
+        list_of_mail_cc: {% raw %}"{{ list_of_mail_cc | default([]) }}"{% endraw %}
+    - name: "{{ customer_engagement }}-shutoff-reminder"
+      description: "Shutoff reminder e-mail for the {{ customer_engagement }} engagement"
+      {% raw -%}
+      rrule: "{{ end_date | parse_datetime | replace_datetime(hour=5) | add_time(days=3) | to_rrule(timezone=timezone) }}"
+      {%- endraw %}
+      unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
+      enabled: {{ enable_notifications | default(false) }}
+      extra_data:
+        body: {% raw %}"{{ shutoff_reminder.body }}"{% endraw %}
+        title: {% raw %}"{{ shutoff_reminder.title }}"{% endraw %}
+        list_of_users: {% raw %}"{{ internal.list_of_users | default([]) }}"{% endraw %}
+        list_of_mail_cc: {% raw %}"{{ list_of_mail_cc | default([]) }}"{% endraw %}
+    - name: "{{ customer_engagement }}-shutoff"
+      description: "Shutoff e-mail for the {{ customer_engagement }} engagement"
+      {% raw -%}
+      rrule: "{{ archive_date | parse_datetime | replace_datetime(hour=5) | to_rrule(timezone=timezone) }}"
+      {%- endraw %}
+      unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
+      enabled: {{ enable_notifications | default(false) }}
+      extra_data:
+        body: {% raw %}"{{ shutoff.body }}"{% endraw %}
+        title: {% raw %}"{{ shutoff.title }}"{% endraw %}
+        list_of_users: {% raw %}"{{ internal.list_of_users | default([]) }}"{% endraw %}
+        list_of_mail_cc: {% raw %}"{{ list_of_mail_cc | default([]) }}"{% endraw %}

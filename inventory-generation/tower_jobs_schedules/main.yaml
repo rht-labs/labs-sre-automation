@@ -21,7 +21,7 @@
       block:
         - name: "Write inventory to file"
           template:
-            src: "tower-management-host.yaml.j2"
+            src: "residency-tower-management-host.yaml.j2"
             dest: "{{ directory }}/iac/inventories/tower_jobs_schedules/inventory/group_vars/tower-management-host.yaml"
 
         - name: "Create hosts file"
@@ -31,4 +31,20 @@
       when: 
         - start_date is defined
         - engagement_type | default('') == 'Residency'
+        - (archive_date | default('2006-01-02T15:04:05.000Z') | to_datetime('%Y-%m-%dT%H:%M:%S.%fZ')).strftime('%s') > now(utc=true).strftime('%s')
+
+    - name: DO500 Engagement Type inventory
+      block:
+        - name: "Write inventory to file"
+          template:
+            src: "do500-tower-management-host.yaml.j2"
+            dest: "{{ directory }}/iac/inventories/tower_jobs_schedules/inventory/group_vars/tower-management-host.yaml"
+
+        - name: "Create hosts file"
+          copy:
+            src: "hosts"
+            dest: "{{ directory }}/iac/inventories/tower_jobs_schedules/inventory/hosts"
+      when: 
+        - start_date is defined
+        - engagement_type | default('') == 'DO500'
         - (archive_date | default('2006-01-02T15:04:05.000Z') | to_datetime('%Y-%m-%dT%H:%M:%S.%fZ')).strftime('%s') > now(utc=true).strftime('%s')
