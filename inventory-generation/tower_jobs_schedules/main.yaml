@@ -21,7 +21,7 @@
       block:
         - name: "Write inventory to file"
           template:
-            src: "tower-management-host.yaml.j2"
+            src: "residency-tower-management-host.yaml.j2"
             dest: "{{ directory }}/iac/inventories/tower_jobs_schedules/inventory/group_vars/tower-management-host.yaml"
 
         - name: "Create hosts file"
