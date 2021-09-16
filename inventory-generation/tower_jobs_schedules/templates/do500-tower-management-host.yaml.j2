@@ -87,7 +87,7 @@ ansible_tower:
       extra_data:
         body: {% raw %}"{{ shutoff_reminder.body }}"{% endraw %}
         title: {% raw %}"{{ shutoff_reminder.title }}"{% endraw %}
-        list_of_users: {% raw %}"{{ full.list_of_users | default([]) }}"{% endraw %}
+        list_of_users: {% raw %}"{{ internal.list_of_users | default([]) }}"{% endraw %}
         list_of_mail_cc: {% raw %}"{{ list_of_mail_cc | default([]) }}"{% endraw %}
     - name: "{{ customer_engagement }}-shutoff"
       description: "Shutoff e-mail for the {{ customer_engagement }} engagement"
@@ -99,5 +99,5 @@ ansible_tower:
       extra_data:
         body: {% raw %}"{{ shutoff.body }}"{% endraw %}
         title: {% raw %}"{{ shutoff.title }}"{% endraw %}
-        list_of_users: {% raw %}"{{ full.list_of_users | default([]) }}"{% endraw %}
+        list_of_users: {% raw %}"{{ internal.list_of_users | default([]) }}"{% endraw %}
         list_of_mail_cc: {% raw %}"{{ list_of_mail_cc | default([]) }}"{% endraw %}
