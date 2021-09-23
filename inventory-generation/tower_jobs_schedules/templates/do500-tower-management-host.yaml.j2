@@ -62,7 +62,7 @@ ansible_tower:
       description: "Workflow Template for removal of Engagement environment"
       ask_variables_on_launch: true
       nodes:
-	- unified_job_template:
+        - unified_job_template:
             name: "{{ customer_engagement }}-remove-openshift-objects"
           success_nodes:
             - unified_job_template:
