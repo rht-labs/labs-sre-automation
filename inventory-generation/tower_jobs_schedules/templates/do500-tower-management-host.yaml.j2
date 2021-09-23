@@ -32,7 +32,7 @@ ansible_tower:
       description: "Job Template to remove OpenShift ArgoCD Application and ResourceClaim"
       inventory: "{{ customer_engagement }}-tower-mail-host"
       project: "infra-ansible"
-      playbook: "playbooks/openshift-remove-object-via-oc.yml"
+      playbook: "playbooks/openshift-manage-objects-via-oc.yml"
       ask_variables_on_launch: true
   inventories:
     - name: "{{ customer_engagement }}-tower-mail-host"
@@ -114,14 +114,16 @@ ansible_tower:
       extra_data:
         body: {% raw %}"{{ shutoff.body }}"{% endraw %}
         title: {% raw %}"{{ shutoff.title }}"{% endraw %}
-        list_of_users: {% raw %}"{{ full.list_of_users | default([]) }}"{% endraw %}
+        list_of_users: {% raw %}"{{ internal.list_of_users | default([]) }}"{% endraw %}
         list_of_mail_cc: {% raw %}"{{ list_of_mail_cc | default([]) }}"{% endraw %}
-        openshift_remove_objects:
+        openshift_manage_objects:
           - name: "gitlab-app-{{ project_id }}"
             kind: "Application"
             namespace: "lodestar-argo-cd"
             api_version: argoproj.io/v1alpha1
-          - name: "do500.ocp4.dev-{{ project_id }}"
+            action: delete
+          - name: "do500.ocp4.{{ engagement_region | default('dev') }}-{{ project_id }}"
             kind: "ResourceClaim"
             namespace: "lodestar-babylon-operators"
             api_version: "poolboy.gpte.redhat.com/v1"
+            action: delete
