@@ -8,9 +8,15 @@ collections: []
 roles:
   - name: infra-ansible
     scm: git
-    #src: https://github.com/redhat-cop/infra-ansible
-    #version: v2.0.4
 
-    # TODO: Update this to reflect the correct infra-ansible release
+    # TODO: Phase 1: Run from fork
     src: https://github.com/MAHDTech/infra-ansible
     version: feature/user-reset
+
+    # TODO: Phase 2: Run from main
+    #src: https://github.com/redhat-cop/infra-ansible
+    #version: main
+
+    # TODO: Phase 3: Run from release
+    #src: https://github.com/redhat-cop/infra-ansible
+    #version: v2.0.4
