@@ -1,0 +1,45 @@
+---
+
+- name: Setup output_dir
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+  tasks:
+    - debug:
+        msg: "Warning: ANSIBLE_REPO_PATH variable is deprecated, you don't have to use it anymore."
+      when: ANSIBLE_REPO_PATH is defined
+
+    - name: Set output_dir if not defined
+      set_fact:
+        output_dir: >-
+          {{
+          ANSIBLE_REPO_PATH + '/workdir' if ANSIBLE_REPO_PATH is defined
+          else '/tmp/output_dir'
+          }}
+      when: output_dir is not defined
+
+    - name: Stat output_dir
+      stat:
+        path: "{{ output_dir }}"
+      register: rstat_output_dir
+
+    - name: Create output_dir if it does not exists
+      file:
+        path: "{{ output_dir }}"
+        state: directory
+      register: result_output_dir
+      when:
+        - not rstat_output_dir.stat.exists
+
+    - name: Create empty files if output dir was created
+      copy:
+        content: |
+          ---
+        dest: "{{ output_dir }}/{{ item }}"
+      when:
+        - result_output_dir is changed
+      loop:
+        - user-body.yaml
+        - user-info.yaml
+        - user-data.yaml
