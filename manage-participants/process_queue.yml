@@ -41,6 +41,12 @@
         name: "../../requirements_roles/infra-ansible/roles/scm/git"
       vars:
         action: push
+        git_config:
+          name: Git Bot
+          username: git-bot
+          email: git-bot@no-reply
+          message: "Remove processed jobs from queue"
+          remove_local: false
       when:
         - repository is defined
 

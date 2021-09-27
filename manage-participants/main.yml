@@ -20,14 +20,14 @@
   vars:
     identities: "{{ lodestar_identities_remove }}"
   when:
-    - lodestar_identities_remove is defined
-    - lodestar_identities_remove != []
+    - lodestar_identities_remove.users is defined
+    - lodestar_identities_remove.users != []
 
-- name: Remove partitipants from queue
+- name: Remove participants from queue
   import_playbook: "process_queue.yml"
   when:
-    - lodestar_identities_remove is defined
-    - lodestar_identities_remove != []
+    - lodestar_identities_remove.users is defined
+    - lodestar_identities_remove.users != []
 
 - name: Add participants to IdM
   import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
