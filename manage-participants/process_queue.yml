@@ -36,11 +36,25 @@
       when:
         - emails_to_match is defined
 
+    - name: "Capture processed filenames"
+      set_fact:
+        processed_files: "{{ ( processed_files | default('') ) + ( filepath | basename ) + ',' }}"
+      loop_control:
+        loop_var: filepath
+      with_items:
+        - "{{ files_to_remove }}"
+
     - name: "Push git repository"
       include_role:
         name: "../../requirements_roles/infra-ansible/roles/scm/git"
       vars:
         action: push
+        git_config:
+          name: Git Bot
+          username: git-bot
+          email: git-bot@no-reply
+          message: "Removed processed files\n\n{{ processed_files }}"
+          remove_local: false
       when:
         - repository is defined
 
