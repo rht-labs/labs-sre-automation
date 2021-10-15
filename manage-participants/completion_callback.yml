@@ -7,8 +7,11 @@
   gather_facts: false
   hosts: localhost
   vars:
-    agnosticd_callback_url: "{{ agnosticd_callback_url | default('') }}"
-    agnosticd_callback_token: "{{ agnosticd_callback_token | default('') }}"
+    # default __meta__ to prevent errors on older ansible versions
+    __meta__:
+      callback: {}
+    agnosticd_callback_url: "{{ __meta__.callback.url | default('') }}"
+    agnosticd_callback_token: "{{ __meta__.callback.token | default('') }}"
   tasks:
 
     - name: Skip completion callback
@@ -51,6 +54,6 @@
             {%- endif -%}
         headers:
           Authorization: Bearer {{ agnosticd_callback_token }}
-        validate_certs: "{{ validate_tower_certs | default(yes) }}"
+        validate_certs: "{{ validate_tower_certs | default(true) }}"
       # Best effort
       ignore_errors: true

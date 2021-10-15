@@ -1,7 +1,7 @@
 ---
 
 - hosts: localhost
-  name: Verify Identity Provider and setup dependencies
+  name: Verify Identity Provider
   tasks:
 
     - name: Wait for IdM to be responsive
@@ -25,6 +25,8 @@
 
 - name: Remove participants from queue
   import_playbook: "process_queue.yml"
+  vars:
+    identities: "{{ lodestar_identities_remove }}"
   when:
     - lodestar_identities_remove.users is defined
     - lodestar_identities_remove.users != []
@@ -33,9 +35,14 @@
   import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
   vars:
     identities: "{{ lodestar_identities }}"
+  when:
+    - lodestar_identities.users is defined
+    - lodestar_identities.users != []
 
 - name: Mail Users
   import_playbook: mail_users.yml
+  vars:
+    identities: "{{ lodestar_identities }}"
 
 - name: Update Anarchy with status
   import_playbook: completion_callback.yml
