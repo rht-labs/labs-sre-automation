@@ -42,15 +42,15 @@
         - lodestar_identities.users is defined
         - lodestar_identities.users != []
 
-- name: Remove participants from IdM
+- name: Remove all participants from IdM
   import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
   vars:
-    identities: "{{ lodestar_identities_remove }}"
+    identities: "{{ lodestar_identities }}"
   when:
-    - lodestar_identities_remove.users is defined
-    - lodestar_identities_remove.users != []
+    - lodestar_identities.users is defined
+    - lodestar_identities.users != []
 
-- name: Remove participants from queue
+- name: Ensure queue is cleared
   import_playbook: "process_queue.yml"
   when:
     - lodestar_identities_remove.users is defined
