@@ -19,8 +19,8 @@
 
     - name: Attempt completion callback
       when:
-      - agnosticd_callback_url != ''
-      - agnosticd_callback_token != ''
+        - agnosticd_callback_url != ''
+        - agnosticd_callback_token != ''
       vars:
         user_body_yaml: "{{ output_dir ~ '/user-body.yaml' }}"
         user_data_yaml: "{{ output_dir ~ '/user-data.yaml' }}"
