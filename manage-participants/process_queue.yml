@@ -41,8 +41,23 @@
         name: "../../requirements_roles/infra-ansible/roles/scm/git"
       vars:
         action: push
+        git_config:
+          name: Git Bot
+          username: git-bot
+          email: git-bot@no-reply
+          message: |
+            Removed processed files
+
+            The following files were removed from the job queue
+
+            {% for file in files_to_remove %}
+            - {{ file | basename }}
+            {% endfor %}
+          remove_local: false
       when:
         - repository is defined
+        - files_to_remove is defined
+        - files_to_remove != []
 
     - name: Pre-populate identities
       set_fact:

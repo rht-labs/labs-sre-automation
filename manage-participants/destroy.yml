@@ -15,19 +15,46 @@
       when:
         - ipa_host is defined
 
-- name: Remove participants from IdM
+- hosts: identity-hosts
+  name: Process Identity removal list
+  tasks:
+
+    - name: Create empty removal list
+      set_fact:
+        lodestar_identities_remove:
+          users: []
+
+    - name: Add users to removal list
+      set_fact:
+        lodestar_identities_remove:
+          users: "{{ lodestar_identities_remove.users + [ user_info ] }}"
+      vars:
+        user_info:
+          first_name: "{{ identity.first_name | trim }}"
+          last_name: "{{ identity.last_name | trim }}"
+          email: "{{ identity.email | trim }}"
+          user_name: "{{ identity.email.split('@')[0] | trim }}"
+          state: "absent"
+      with_items: "{{ lodestar_identities.users }}"
+      loop_control:
+        loop_var: identity
+      when:
+        - lodestar_identities.users is defined
+        - lodestar_identities.users != []
+
+- name: Remove all participants from IdM
   import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
   vars:
     identities: "{{ lodestar_identities }}"
   when:
-    - lodestar_identities_remove is defined
-    - lodestar_identities_remove != []
+    - lodestar_identities.users is defined
+    - lodestar_identities.users != []
 
-- name: Remove partitipants from queue
+- name: Ensure queue is cleared
   import_playbook: "process_queue.yml"
   when:
-    - lodestar_identities_remove is defined
-    - lodestar_identities_remove != []
+    - lodestar_identities_remove.users is defined
+    - lodestar_identities_remove.users != []
 
 - name: Update Anarchy with status
   import_playbook: completion_callback.yml
