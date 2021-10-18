@@ -20,7 +20,7 @@
       set_fact:
         emails_to_match: "{{ (emails_to_match | default([])) + [ user.email ] }}"
       loop:
-        "{{ lodestar_identities_remove.users | flatten(levels=1) }}"
+        "{{ identities.users | flatten(levels=1) }}"
       loop_control:
         index_var: index
         loop_var: user
@@ -58,7 +58,3 @@
         - repository is defined
         - files_to_remove is defined
         - files_to_remove != []
-
-    - name: Pre-populate identities
-      set_fact:
-        identities: "{{ lodestar_identities }}"

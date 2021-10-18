@@ -15,19 +15,13 @@
       when:
         - ipa_host is defined
 
-- hosts: identity-hosts
-  name: Process Identity removal list
-  tasks:
-
-    - name: Create empty removal list
+    - name: Create empty user removal list
       set_fact:
-        lodestar_identities_remove:
-          users: []
+        users_remove: []
 
-    - name: Add users to removal list
+    - name: Add all users to removal list
       set_fact:
-        lodestar_identities_remove:
-          users: "{{ lodestar_identities_remove.users + [ user_info ] }}"
+        users_remove: "{{ users_remove + [ user_info ] }}"
       vars:
         user_info:
           first_name: "{{ identity.first_name | trim }}"
@@ -42,15 +36,20 @@
         - lodestar_identities.users is defined
         - lodestar_identities.users != []
 
-- name: Remove all participants from IdM
+    - name: Update user removal list
+      set_fact:
+        lodestar_identities_destroy:
+          users: "{{ users_remove }}"
+
+- name: Remove participants from IdM
   import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
   vars:
-    identities: "{{ lodestar_identities }}"
+    identities: "{{ lodestar_identities_destroy }}"
   when:
-    - lodestar_identities.users is defined
-    - lodestar_identities.users != []
+    - lodestar_identities_destroy.users is defined
+    - lodestar_identities_destroy.users != []
 
-- name: Ensure queue is cleared
+- name: Remove participants from queue
   import_playbook: "process_queue.yml"
   when:
     - lodestar_identities_remove.users is defined
