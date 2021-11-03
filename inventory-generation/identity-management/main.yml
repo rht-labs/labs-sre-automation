@@ -9,6 +9,10 @@
       when:
         - directory is undefined or (directory | trim) == ""
 
+    - name: Read Engagement Data
+      include_vars:
+        file: "{{ directory }}/engagement.json"
+
     - name: "Fail If Governor Type Is Not Provided"
       fail:
         msg: "governor_type and governor_spec vars need to be provided in order to indicate babylon workflow"
@@ -18,10 +22,6 @@
     - name: Generate Timestamp
       set_fact:
         inv_ts: "{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
-
-    - name: Read Engagement Data
-      include_vars:
-        file: "{{ directory }}/engagement.json"
 
     - name: Read Credentials
       include_vars:
@@ -97,6 +97,7 @@
               start_date: "{{ (start_date | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%d %b %Y') }}"
               customer_name: "{{ customer_name }}"
               project_name: "{{ project_name }}"
+              ocp_subdomain: "{{ hosting_environments[0].ocp_sub_domain | lower }}"
               ipa_validate_certs: "{{ ipa_validate_certs }}"
               ipa_host: "{{ ipa_host }}"
               ipa_admin_user: "{{ ipa_admin_user }}"
