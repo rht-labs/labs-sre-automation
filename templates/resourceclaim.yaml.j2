@@ -11,7 +11,7 @@ spec:
       kind: AnarchySubject
       metadata:
         annotations:
-          poolboy.gpte.redhat.com/resource-provider-name: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower ) }}
+          poolboy.gpte.redhat.com/resource-provider-name: babylon
         generateName: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower) }}-{{ claim_postfix | default("") }}
         labels:
           governor: "{{ (engagement_type | lower) +'.' + (governor_type | lower) + '.' + (governor_spec | lower) }}"
