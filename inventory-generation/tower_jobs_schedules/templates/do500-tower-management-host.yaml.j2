@@ -32,7 +32,7 @@ ansible_tower:
       description: "Job Template to remove OpenShift ArgoCD Application and ResourceClaim"
       inventory: "{{ customer_engagement }}-tower-mail-host"
       project: "infra-ansible"
-      playbook: "playbooks/openshift-manage-objects-via-oc.yml"
+      playbook: "playbooks/openshift-manage-objects-via-exec.yml"
       ask_variables_on_launch: true
   inventories:
     - name: "{{ customer_engagement }}-tower-mail-host"
