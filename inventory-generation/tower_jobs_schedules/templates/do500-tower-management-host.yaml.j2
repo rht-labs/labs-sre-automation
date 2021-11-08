@@ -118,11 +118,13 @@ ansible_tower:
         list_of_mail_cc: {% raw %}"{{ list_of_mail_cc | default([]) }}"{% endraw %}
         openshift_manage_objects:
           - name: "gitlab-app-{{ project_id }}"
+            executable: "oc"
             kind: "Application"
             namespace: "lodestar-argo-cd"
             api_version: argoproj.io/v1alpha1
             action: delete
           - name: "do500.ocp4.{{ engagement_region | default('dev') }}-{{ project_id }}"
+            executable: "oc"
             kind: "ResourceClaim"
             namespace: "lodestar-babylon-operators"
             api_version: "poolboy.gpte.redhat.com/v1"
