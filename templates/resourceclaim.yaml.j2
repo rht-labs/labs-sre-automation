@@ -9,7 +9,7 @@ spec:
     provider:
       apiVersion: poolboy.gpte.redhat.com/v1
       kind: ResourceProvider
-      name: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower ) }}
+      name: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower) }}
       namespace: lodestar-babylon-operators
   - template:
       apiVersion: anarchy.gpte.redhat.com/v1
