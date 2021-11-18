@@ -6,12 +6,12 @@ metadata:
   name: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower ) }}-{{ project_id }}
 spec:
   resources:
-    provider:
+  - provider:
       apiVersion: poolboy.gpte.redhat.com/v1
       kind: ResourceProvider
       name: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower) }}
       namespace: {{ poolboy_namespace | default('lodestar-babylon-operators' }}
-  - template:
+    template:
       apiVersion: anarchy.gpte.redhat.com/v1
       kind: AnarchySubject
       metadata:
