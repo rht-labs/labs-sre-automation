@@ -12,14 +12,7 @@ spec:
       name: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower) }}
       namespace: lodestar-babylon-operators
     template:
-      apiVersion: anarchy.gpte.redhat.com/v1
-      kind: AnarchySubject
-      metadata:
-        generateName: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower) }}-{{ claim_postfix | default("") }}
-        labels:
-          governor: "{{ (engagement_type | lower) +'.' + (governor_type | lower) + '.' + (governor_spec | lower) }}"
       spec:
-        governor: "{{ (engagement_type | lower) +'.' + (governor_type | lower) + '.' + (governor_spec | lower) }}"
         vars:
           {%- if desired_state is defined and desired_state|length %}
           desired_state: {{ desired_state }}
