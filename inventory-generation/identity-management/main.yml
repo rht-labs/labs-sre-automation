@@ -1,7 +1,7 @@
 ---
 - name: Generate identity-management inventory based off of engagement.json
   hosts: local
-  gather_facts: false
+  gather_facts: true
   tasks:
     - name: "Fail If Working Directory Is Not Provided"
       fail:

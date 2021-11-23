@@ -2,7 +2,7 @@
 
 - name: Translate engagement data into Argo-processable resources
   hosts: local
-  gather_facts: false
+  gather_facts: true
   tasks:
     - name: Read Engagement Data
       include_vars:
