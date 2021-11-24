@@ -15,12 +15,10 @@ spec:
       spec:
         vars:
           # The action schedule is hardcoded to fixed dates to avoid any accidental shutdown.
-          # - these values are required by Babylon, but aren't in play for our use, 
-          #   and hence can be hardcoded to past/future values that are considered "safe" 
+          # - these values are required by Babylon, but aren't in play for our use,
+          #   and hence can be hardcoded to past/future values that are considered "safe"
           #   as we don't expect to hit these future dates in the lifespan of this solution
           action_schedule:
-            default_runtime: 1000d
-            maximum_runtime: 1000d
             start: "2020-01-01T00:00:00Z"
             stop: "2100-01-01T00:00:00Z"
           {%- if desired_state is defined and desired_state|length %}
