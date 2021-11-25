@@ -48,6 +48,8 @@
             src: "hosts"
             dest: "{{ directory }}/iac/inventories/notifications/inventory/hosts"
 
+      vars:
+        ocp_subdomain: "{{ hosting_environments[0].ocp_sub_domain | lower }}"
       when:
         - notifications_dir.stat.exists is false
         - start_date is defined
