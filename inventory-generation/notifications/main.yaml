@@ -50,6 +50,7 @@
 
       vars:
         ocp_subdomain: "{{ hosting_environments[0].ocp_sub_domain | lower }}"
+        subdomain_base_suffix: "{{ engagement_region | default('dev') + cloud_provider_index | default('-1')' + ocp_base_url }}"
       when:
         - notifications_dir.stat.exists is false
         - start_date is defined
@@ -57,6 +58,7 @@
         - (hosting_environments is defined) and (hosting_environments | length > 0)
         - (archive_date | default('2006-01-02T15:04:05Z') | to_datetime('%Y-%m-%dT%H:%M:%SZ')).strftime('%s') > now(utc=true).strftime('%s')
         - hosting_environments[0].ocp_sub_domain is defined
+        - ocp_base_url is defined
 
     - name: "Process list of users from template"
       template:
