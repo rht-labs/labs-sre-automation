@@ -56,6 +56,7 @@
         - engagement_type | default('') == 'Residency' or engagement_type | default('') == 'DO500'
         - (hosting_environments is defined) and (hosting_environments | length > 0)
         - (archive_date | default('2006-01-02T15:04:05Z') | to_datetime('%Y-%m-%dT%H:%M:%SZ')).strftime('%s') > now(utc=true).strftime('%s')
+        - hosting_environments[0].ocp_sub_domain is defined
 
     - name: "Process list of users from template"
       template:
