@@ -3,4 +3,4 @@
 - name: infra-ansible
   scm: git
   src: https://github.com/redhat-cop/infra-ansible
-  version: main
+  version: v2.0.6
