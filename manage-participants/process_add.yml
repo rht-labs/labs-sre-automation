@@ -1,8 +1,9 @@
 ---
 
 - hosts: identity-hosts
-  set_fact:
-    identities: "{{ lodestar_identities }}"
+  tasks:
+    - set_fact:
+        identities: "{{ lodestar_identities }}"
 
 - name: Add participants to IdM
   import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
