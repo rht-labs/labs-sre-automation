@@ -1,6 +1,6 @@
 ---
 
-- hosts: localhost
+- hosts: identity-hosts
   name: Verify Identity Provider
   tasks:
 
@@ -16,33 +16,16 @@
         - ipa_host is defined
 
 - name: Remove participants from IdM
-  import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
-  vars:
-    identities: "{{ lodestar_identities_remove }}"
-  when:
-    - lodestar_identities_remove.users is defined
-    - lodestar_identities_remove.users != []
-
-- name: Remove participants from queue
-  import_playbook: "process_queue.yml"
-  vars:
-    identities: "{{ lodestar_identities_remove }}"
+  import_playbook: "process_remove.yml"
   when:
     - lodestar_identities_remove.users is defined
     - lodestar_identities_remove.users != []
 
 - name: Add participants to IdM
-  import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
-  vars:
-    identities: "{{ lodestar_identities }}"
+  import_playbook: "process_add.yml"
   when:
     - lodestar_identities.users is defined
     - lodestar_identities.users != []
-
-- name: Mail Users
-  import_playbook: mail_users.yml
-  vars:
-    identities: "{{ lodestar_identities }}"
 
 - name: Update Anarchy with status
   import_playbook: completion_callback.yml
