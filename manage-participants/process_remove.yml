@@ -1,0 +1,12 @@
+---
+
+- hosts: identity-hosts
+  set_fact:
+    identities: "{{ lodestar_identities_remove }}"
+
+- name: Remove participants from IdM
+  import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
+
+- name: Remove participants from queue
+  import_playbook: "process_queue.yml"
+

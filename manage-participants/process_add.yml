@@ -1,0 +1,12 @@
+---
+
+- hosts: identity-hosts
+  set_fact:
+    identities: "{{ lodestar_identities }}"
+
+- name: Add participants to IdM
+  import_playbook: "../../requirements_roles/infra-ansible/playbooks/manage-identities/manage-idm-identities.yml"
+
+- name: Mail Users
+  import_playbook: mail_users.yml
+
