@@ -26,6 +26,17 @@ internal:
 {{ users.append(technical_lead_email) }}
 {%- endif %}
 
+admins:
+  list_of_users:
+{% for user in engagement_users | default([]) %}
+{% filter indent(width=6) %}
+{% if 'lodestar-admins' in user.role %}
+    - {{ user | to_nice_yaml }}
+{%- endif %}
+{%- endfilter %}
+{%- endfor %}
+
+
 {% if users %}
 list_of_mail_cc:
 {% for user in users %}
