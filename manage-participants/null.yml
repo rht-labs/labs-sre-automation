@@ -4,8 +4,8 @@
 ################################################################################
 # Entry point used to send a completion callback and ends the playbook without action
 ################################################################################
-- name: Completion callback
-  import_playbook: completion_callback.yml
+
+- import_playbook: completion_callback.yml
 
 - name: End Playbook
   gather_facts: false
