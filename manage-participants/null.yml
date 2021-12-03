@@ -8,4 +8,7 @@
 - import_playbook: completion_callback.yml
 
 - name: End Playbook
-  meta: end_play
+  gather_facts: false
+  hosts: localhost
+  tasks:
+    - meta: end_play
