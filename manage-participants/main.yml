@@ -3,11 +3,14 @@
 - hosts: identity-hosts
   name: Verify Identity Provider
   tasks:
+    - name: "Fail if ocp_subdomain or subdomain_base_suffix not provided"
+      fail:
+        msg: "ocp_subdomain and subdomain_base_suffix vars needs to be provided in order to continue withe the playbook"
+      when:
+        - ocp_subdomain is undefined or subdomain_base_suffix is undefined
+
     - set_fact:
         ipa_host: "ipa.apps.{{ ocp_subdomain }}.{{ subdomain_base_suffix }}"
-      when:
-        - ocp_subdomain is defined
-        - subdomain_base_suffix is defined
 
     - name: Wait for IdM to be responsive
       uri:
@@ -17,8 +20,6 @@
       until: rc.status|trim|int == 200
       retries: 90
       delay: 60
-      when:
-        - ipa_host is defined
 
 - name: Remove participants from IdM
   import_playbook: "process_remove.yml"
