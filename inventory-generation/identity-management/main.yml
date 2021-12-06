@@ -84,7 +84,6 @@
         - name: "Set Identity Provider facts"
           set_fact:
             idp_type: "{{ idp_type | default('idm') }}"
-            ipa_host: "{{ idp_host_url if idp_host_url is defined else 'ipa.apps.' + (hosting_environments[0].ocp_sub_domain | lower) + '.' + engagement_region | default('dev') + '-1.' + ocp_base_url }}"
             ipa_admin_user: "{{ ocp_admin_username }}"
             ipa_admin_password: "{{ ocp_admin_password }}"
             ipa_validate_certs: "{{ ipa_validate_certs | default(true) }}"
@@ -99,7 +98,6 @@
               project_name: "{{ project_name }}"
               ocp_subdomain: "{{ hosting_environments[0].ocp_sub_domain | lower }}"
               ipa_validate_certs: "{{ ipa_validate_certs }}"
-              ipa_host: "{{ ipa_host }}"
               ipa_admin_user: "{{ ipa_admin_user }}"
               ipa_admin_password: "{{ ipa_admin_password }}"
               list_of_mail_cc: "{{ cc_list }}"
