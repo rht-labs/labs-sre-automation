@@ -7,7 +7,8 @@
       fail:
         msg: "Variable ocp_subdomain ({{ ocp_subdomain | default('')}}) or subdomain_base_suffix ({{ subdomain_base_suffix | default('') }}) is not defined or empty"
       when:
-        - (ocp_subdomain is undefined or (ocp_subdomain | trim) == "") or (subdomain_base_suffix is undefined or (subdomain_base_suffix | trim) == "")
+        - (ocp_subdomain is undefined or ocp_subdomain|trim == "") or 
+          (subdomain_base_suffix is undefined or subdomain_base_suffix|trim == "")
 
     - set_fact:
         ipa_host: "ipa.apps.{{ ocp_subdomain }}.{{ subdomain_base_suffix }}"
