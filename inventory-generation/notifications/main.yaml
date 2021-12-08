@@ -20,6 +20,11 @@
         path: "{{ directory }}/iac/inventories/notifications/inventory/group_vars/all"
       register: notifications_dir
 
+    - name: "Pre-process timestamps"
+      set_fact:
+        - archive_date_in_seconds: "{{ (archive_date | default('2000-01-01T') | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%s') }}" 
+        - time_now_in_seconds: "{{ now(utc=true, fmt='%s') }}"
+
     - name: "Copy email templates from main repo to engagement repo - if the target directory does NOT already exist"
       block:
         - name: "Add directory for group_vars/all"
@@ -56,7 +61,7 @@
         - start_date is defined
         - engagement_type | default('') == 'Residency' or engagement_type | default('') == 'DO500'
         - (hosting_environments is defined) and (hosting_environments | length > 0)
-        - (archive_date | default('2006-01-02T15:04:05Z') | to_datetime('%Y-%m-%dT%H:%M:%SZ')).strftime('%s') > now(utc=true).strftime('%s')
+        - archive_date_in_seconds > time_now_in_seconds
         - hosting_environments[0].ocp_sub_domain is defined
         - ocp_base_url is defined
 
@@ -68,4 +73,4 @@
         - start_date is defined
         - engagement_type | default('') == 'Residency' or engagement_type | default('') == 'DO500'
         - (hosting_environments is defined) and (hosting_environments | length > 0)
-        - (archive_date | default('2006-01-02T15:04:05Z') | to_datetime('%Y-%m-%dT%H:%M:%SZ')).strftime('%s') > now(utc=true).strftime('%s')
+        - archive_date_in_seconds > time_now_in_seconds

@@ -7,15 +7,20 @@
       when:
         - directory is undefined or (directory | trim) == ""
 
-    - name: Read Engagement Data
+    - name: 'Read Engagement Data'
       include_vars:
         file: '{{ directory }}/engagement.json'
 
-    - name: Set customer engagement
+    - name: 'Set customer engagement'
       set_fact:
         customer_engagement: "{{ customer_name | lower | replace(' ', '_') }}-{{ project_name | lower | replace(' ', '_') }}"
 
-    - name: Set facts to bootstrap scheduled notifications into Ansible Tower
+    - name: 'Pre-process timestamps'
+      set_fact:
+        - archive_date_in_seconds: "{{ (archive_date | default('2000-01-01T') | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%s') }}"
+        - time_now_in_seconds: "{{ now(utc=true, fmt='%s') }}"
+
+    - name: 'Set facts to bootstrap scheduled notifications into Ansible Tower'
       set_fact:
         delete_missing_items: false
         ansible_tower:
@@ -85,6 +90,6 @@
         - start_date is defined
         - (hosting_environments is defined) and (hosting_environments | length > 0)
         - engagement_type | default('') == 'Residency' or engagement_type | default('') == 'DO500'
-        - (archive_date | default('2006-01-02T15:04:05Z') | to_datetime('%Y-%m-%dT%H:%M:%SZ')).strftime('%s') > now(utc=true).strftime('%s')
+        - archive_date_in_seconds > time_now_in_seconds
 
 - import_playbook: '{{ infra_ansible_directory }}/playbooks/ansible/tower/configure-ansible-tower.yml'
