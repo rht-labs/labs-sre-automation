@@ -9,16 +9,21 @@
       when:
         - directory is undefined or (directory | trim) == ""
 
-    - name: Read Engagement Data
+    - name: 'Read Engagement Data'
       include_vars:
         file: "{{ directory }}/engagement.json"
 
-    - name: Combine customer and engagement name
+    - name: 'Combine customer and engagement name'
       set_fact:
         customer_engagement: "{{ customer_name | lower | replace(' ', '_') }}-{{ project_name | lower | replace(' ', '_') }}"
 
-    - name: Residency Engagement Type inventory
-      block:
+    - name: 'Pre-process timestamps'
+      set_fact:
+        - archive_date_in_seconds: "{{ (archive_date | default('2000-01-01T') | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%s') }}"
+        - time_now_in_seconds: "{{ now(utc=true, fmt='%s') }}"
+
+    - name: 'Residency Engagement Type inventory'
+      block:`
         - name: "Write inventory to file"
           template:
             src: "residency-tower-management-host.yaml.j2"
@@ -31,9 +36,9 @@
       when:
         - start_date is defined
         - engagement_type | default('') == 'Residency'
-        - (archive_date | default('2006-01-02T15:04:05Z') | to_datetime('%Y-%m-%dT%H:%M:%SZ')).strftime('%s') > now(utc=true).strftime('%s')
+        - archive_date_in_seconds > time_now_in_seconds
 
-    - name: DO500 Engagement Type inventory
+    - name: 'DO500 Engagement Type inventory'
       block:
         - name: "Write inventory to file"
           template:
@@ -47,4 +52,4 @@
       when:
         - start_date is defined
         - engagement_type | default('') == 'DO500'
-        - (archive_date | default('2006-01-02T15:04:05Z') | to_datetime('%Y-%m-%dT%H:%M:%SZ')).strftime('%s') > now(utc=true).strftime('%s')
+        - archive_date_in_seconds > time_now_in_seconds
