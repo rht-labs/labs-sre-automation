@@ -19,8 +19,8 @@
 
     - name: 'Pre-process timestamps'
       set_fact:
-        - archive_date_in_seconds: "{{ (archive_date | default('2000-01-01T') | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%s') }}"
-        - time_now_in_seconds: "{{ now(utc=true, fmt='%s') }}"
+        archive_date_in_seconds: "{{ (archive_date | default('2000-01-01T') | regex_replace('^(.*)T.*$', '\\1') | to_datetime('%Y-%m-%d')).strftime('%s') }}"
+        time_now_in_seconds: "{{ now(utc=true, fmt='%s') }}"
 
     - name: 'Residency Engagement Type inventory'
       block:
