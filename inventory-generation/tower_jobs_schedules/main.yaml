@@ -23,7 +23,7 @@
         - time_now_in_seconds: "{{ now(utc=true, fmt='%s') }}"
 
     - name: 'Residency Engagement Type inventory'
-      block:`
+      block:
         - name: "Write inventory to file"
           template:
             src: "residency-tower-management-host.yaml.j2"
