@@ -1,0 +1,15 @@
+---
+
+- set_fact:
+    user_group_list: "[]"
+
+- set_fact:
+    user_group_list: "{{ item.additional_groups | d([]) + [ user_item.role] }}"
+  loop: "{{ user_options.user_roles.options }}"
+  when:
+    - user_item.role == item.value
+
+- include_tasks: process_user_entry.yml
+  loop_control:
+    loop_var: user_group
+  loop: "{{ user_group_list }}"

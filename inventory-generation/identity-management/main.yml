@@ -13,6 +13,10 @@
       include_vars:
         file: "{{ directory }}/engagement.json"
 
+    - name: Read Runtime Data
+      include_vars:
+        file: "{{ directory }}/runtime.json"
+
     - name: "Fail If Governor Type Is Not Provided"
       fail:
         msg: "governor_type and governor_spec vars need to be provided in order to indicate babylon workflow"
@@ -30,27 +34,32 @@
         - "ocp-admin-credentials.json"
         - "ocp-ldap-sa-credentials.json"
 
-    - name: "Add users to inventory"
-      set_fact:
-        users: "{{ (users | default([])) + [ { 'first_name': (item.first_name | trim), 'last_name': (item.last_name | trim), 'email': (item.email | trim) , 'user_name': (item.email.split('@')[0] | trim) } ] }}"
+    - include_tasks: process_user.yml
+      loop_control:
+        loop_var: user_item
       loop: "{{ engagement_users }}"
 
-    - name: "Add LDAP Service Account"
-      set_fact:
-        users: "{{ (users | default([])) + [ { 'first_name': 'LDAP', 'last_name': 'SA', 'email': 'ldap@localhost.com', 'user_name': ocp_ldap_sa_username, 'generate_password': false, 'password': ocp_ldap_sa_password  } ] }}"
+    - include_tasks: process_groups.yml
+      loop_control:
+        loop_var: group_item
+      loop: "{{ user_options.user_roles.options }}"
 
-    - name: "Get Unique Groups"
-      set_fact:
-        unique_groups: "{{ engagement_users | json_query('[].role') | unique }}"
+    - name: "Fail if no users in the list"
+      fail:
+        msg: "No users accounts will be created, check engagement data and runtime configuration."
+      when: user_list is not defined
 
-    - name: "Set Group Membership"
+    - name: "Assemble final list of users"
       set_fact:
-        usrgrp: "{{ (usrgrp | default([])) + [ {'name': item, 'members': (engagement_users | selectattr('role','equalto',item) | map(attribute='email') | map('regex_replace','@.*','') | list) } ] }}"
-      loop: "{{ unique_groups }}"
+        users: "{{ user_list.keys() | map('extract', user_list) | list | flatten | unique }}"
+
+    - name: "Get Unique Groups form runtime config"
+      set_fact:
+        unique_groups: "{{ user_options.user_roles.options | json_query('[].value') | unique }}"
 
     - name: Add LDAP Groups Grouping
       set_fact:
-        usrgrp: "{{ (usrgrp | default([])) + [ {'name': 'ldap-members', 'childgroups': unique_groups } ] }}"
+        user_groups: "{{ (user_groups | default([])) + [ {'name': 'ldap-members', 'childgroups': unique_groups } ] }}"
 
     - name: "Set List of Mail CC"
       set_fact:
@@ -103,7 +112,7 @@
               list_of_mail_cc: "{{ cc_list }}"
               lodestar_identities:
                 users: "{{ users }}"
-                groups: "{{ usrgrp }}"
+                groups: "{{ user_groups }}"
               lodestar_identities_remove:
                 users: "{{ users_remove | default([]) }}"
               repository:
