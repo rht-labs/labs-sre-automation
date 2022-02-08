@@ -37,7 +37,7 @@
 
     - name: "Add LDAP Service Account"
       set_fact:
-        users: "{{ (users | default([])) + [ { 'first_name': 'LDAP', 'last_name': 'SA', 'email': 'ldap@localhost.com', 'user_name': ocp_ldap_sa_username, 'generate_password': false, 'password': ocp_ldap_sa_password  } ] }}"
+        users: "{{ (users | default([])) + [ { 'first_name': 'LDAP', 'last_name': 'SA', 'email': 'ldap@localhost.com', 'user_name': ocp_ldap_sa_username, 'generate_password': False, 'notify_user': False, 'password': ocp_ldap_sa_password  } ] }}"
 
     - name: "Get Unique Groups"
       set_fact:
