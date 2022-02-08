@@ -39,23 +39,19 @@
         loop_var: user_item
       loop: "{{ engagement_users }}"
 
-    - name: "Add LDAP Service Account"
-      set_fact:
-        users: "{{ (users | default([])) + [ { 'first_name': 'LDAP', 'last_name': 'SA', 'email': 'ldap@localhost.com', 'user_name': ocp_ldap_sa_username, 'generate_password': False, 'notify_user': False, 'password': ocp_ldap_sa_password  } ] }}"
-
     - include_tasks: process_groups.yml
       loop_control:
         loop_var: group_item
       loop: "{{ user_options.user_roles.options }}"
 
-    - name: "Fail if no users in the list"
-      fail:
-        msg: "No users accounts will be created, check engagement data and runtime configuration."
-      when: user_list is not defined
-
     - name: "Assemble final list of users"
       set_fact:
         users: "{{ user_list.keys() | map('extract', user_list) | list | flatten | unique }}"
+      when: users is defined
+
+    - name: "Add LDAP Service Account"
+      set_fact:
+        users: "{{ (users | default([])) + [ { 'first_name': 'LDAP', 'last_name': 'SA', 'email': 'ldap@localhost.com', 'user_name': ocp_ldap_sa_username, 'generate_password': False, 'notify_user': False, 'password': ocp_ldap_sa_password  } ] }}"
 
     - name: "Get Unique Groups form runtime config"
       set_fact:
