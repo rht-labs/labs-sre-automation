@@ -4,15 +4,7 @@
   include_vars:
     file: "{{ job.path }}"
 
-- name: Set fact with user information
-  set_fact:
-    user_info:
-      first_name: "{{ first_name | trim }}"
-      last_name: "{{ last_name | trim }}"
-      email: "{{ email | trim }}"
-      user_name: "{{ email.split('@')[0] | trim }}"
-      state: "absent"
-
 - name: "Add User to removal queue"
   set_fact:
-    users_remove: "{{ (users_remove | default([])) + [ user_info ] }}"
+    users_remove: "{{ users_remove|d([]) + [ item | combine({'state': 'absent'})] }}"
+  loop: "{{ users | selectattr('email', 'equalto', email ) | list }}"
