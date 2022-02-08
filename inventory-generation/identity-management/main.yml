@@ -39,6 +39,10 @@
         loop_var: user_item
       loop: "{{ engagement_users }}"
 
+    - name: "Add LDAP Service Account"
+      set_fact:
+        users: "{{ (users | default([])) + [ { 'first_name': 'LDAP', 'last_name': 'SA', 'email': 'ldap@localhost.com', 'user_name': ocp_ldap_sa_username, 'generate_password': False, 'notify_user': False, 'password': ocp_ldap_sa_password  } ] }}"
+
     - include_tasks: process_groups.yml
       loop_control:
         loop_var: group_item
