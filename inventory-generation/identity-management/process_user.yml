@@ -1,7 +1,7 @@
 ---
 
 - set_fact:
-    user_group_list: "[]"
+    user_group_list: []
 
 - set_fact:
     user_group_list: "{{ item.additional_groups | d([]) + [ user_item.role] }}"

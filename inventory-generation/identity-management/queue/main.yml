@@ -18,3 +18,29 @@
         loop_var: job
       when:
         - jobs_user_management is defined
+
+- set_fact:
+    user_list: []
+
+- include_tasks: process_user.yml
+  loop_control:
+    loop_var: user_item
+  loop: "{{ job_users }}"
+  when:
+    job_users is defined
+
+- name: Assemble final list of users in remove queue
+  set_fact:
+    user_list: "{{ user_list.keys() | map('extract', user_list) | list | flatten | unique }}"
+  when: 
+    - user_list is defined
+    - user_list | length > 0
+
+
+- name: Create user remove list
+  set_fact:
+    users_remove: "{{ users_remove|d([]) + [ item | combine({'state': 'absent'})] }}"
+  loop: "{{ user_list }}"
+
+
+
