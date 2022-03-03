@@ -1,0 +1,25 @@
+---
+
+- name: "Check for Job queue"
+  ansible.builtin.stat:
+    path: "{{ directory }}/queue"
+  register: job_queue
+  ignore_errors: True
+
+- name: "Process User Management Jobs in the queue"
+  find:
+    paths: "{{ directory }}/queue"
+    patterns: "user-management-*.json"
+  register: jobs_user_management
+  when:
+    - job_queue.stat.path is defined
+
+- name: "Assemble list of users to be removed"
+  include: "process_user_removal.yml"
+  loop_control:
+    loop_var: job
+  with_items:
+    - "{{ jobs_user_management.files }}"
+  when:
+    - jobs_user_management is defined
+

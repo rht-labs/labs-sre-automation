@@ -16,4 +16,4 @@
 
 - name: "Add User to removal queue"
   set_fact:
-    job_users: "{{ (users_remove | default([])) + [ user_info ] }}"
+    list_of_users_to_remove: "{{ (list_of_users_to_remove | d([])) + [ user_info ] }}"
