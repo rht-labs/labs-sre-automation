@@ -17,8 +17,3 @@
 - name: "Add User to removal queue"
   set_fact:
     job_users: "{{ (users_remove | default([])) + [ user_info ] }}"
-
-#- name: "Add User to removal queue"
-#  set_fact:
-#    users_remove: "{{ users_remove|d([]) + [ item | combine({'state': 'absent'})] }}"
-#  loop: "{{ users | selectattr('email', 'equalto', email ) | list }}"

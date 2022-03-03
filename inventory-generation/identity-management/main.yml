@@ -34,6 +34,15 @@
       when:
         - (governor_type is undefined or (governor_type | trim) == "") or (governor_spec is undefined or (governor_spec | trim) == "")
 
+    - name: "Fail if user_options.user_roles.options Is Not Provided"
+      fail:
+        msg: "user_options.user_roles.options is not defined at runtime.json file or contain incorrect values"
+      when: >
+        user_options is undefined or 
+        user_options.user_roles is undefined or
+        user_options.user_roles.options is undefined or
+        user_options.user_roles.options[0].value is undefined
+
     - name: Generate Timestamp
       set_fact:
         inv_ts: "{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
