@@ -91,7 +91,7 @@
     #####################################################################################################################
     # Add in the LDAP SA and group sync memberships
     # 
-    - name: "Create a LDAP user and group facts to simplify process"
+    - name: "Create a LDAP user and group facts to simplify processing below"
       set_fact:
         ldap_users:
           - first_name: 'LDAP'
