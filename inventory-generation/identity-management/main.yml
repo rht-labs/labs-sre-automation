@@ -13,9 +13,20 @@
       include_vars:
         file: "{{ directory }}/engagement.json"
 
+    - name: Check if Runtime Data file exist
+      stat:
+        path: "{{ directory }}/runtime.json"
+      register: runtime_file_data
+
+    - name: Fail if runtime.json not found
+      fail:
+        msg: "The runtime.json file not found"
+      when: not runtime_file_data.stat.exists
+
     - name: Read Runtime Data
       include_vars:
         file: "{{ directory }}/runtime.json"
+      when: runtime_file_data.stat.exists
 
     - name: "Fail If Governor Type Is Not Provided"
       fail:
@@ -47,7 +58,7 @@
     - name: "Assemble final list of users"
       set_fact:
         users: "{{ user_list.keys() | map('extract', user_list) | list | flatten | unique }}"
-      when: users is defined
+      when: user_list is defined
 
     - name: "Add LDAP Service Account"
       set_fact:
