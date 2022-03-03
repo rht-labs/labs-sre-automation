@@ -93,25 +93,25 @@
     # 
     - name: "Create a LDAP user and group facts to simplify process"
       set_fact:
-        ldap_sa_user:
-          first_name: 'LDAP'
-          last_name: 'SA'
-          email: 'ldap@localhost.com'
-          user_name: "{{ ocp_ldap_sa_username }}"
-          password: "{{ ocp_ldap_sa_password }}"
-          generate_password: False
-          notify_user: False
+        ldap_users:
+          - first_name: 'LDAP'
+            last_name: 'SA'
+            email: 'ldap@localhost.com'
+            user_name: "{{ ocp_ldap_sa_username }}"
+            password: "{{ ocp_ldap_sa_password }}"
+            generate_password: False
+            notify_user: False
         ldap_groups:
-          name: 'ldap-members'
-          childgroups: "{{ unique_groups }}"
+          - name: 'ldap-members'
+            childgroups: "{{ unique_groups }}"
 
     - name: "Add LDAP Service Account to list of users"
       set_fact:
-        users: "{{ (users | default([])) + [ ldap_sa_user ] }}"
+        users: "{{ (users | default([])) + ldap_users }}"
 
     - name: Add LDAP Groups Grouping
       set_fact:
-        user_groups: "{{ (user_groups | default([])) + [ ldap_groups ] }}"
+        user_groups: "{{ (user_groups | default([])) + ldap_groups }}"
 
 
     #####################################################################################################################
