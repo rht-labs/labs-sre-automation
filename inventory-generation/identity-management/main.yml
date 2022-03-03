@@ -93,7 +93,7 @@
     # 
     - name: "Create a LDAP user and group facts to simplify process"
       set_fact:
-        ldap_user:
+        ldap_sa_user:
           first_name: 'LDAP'
           last_name: 'SA'
           email: 'ldap@localhost.com'
@@ -107,7 +107,7 @@
 
     - name: "Add LDAP Service Account to list of users"
       set_fact:
-        users: "{{ (users | default([])) + [ ldap_user ] }}"
+        users: "{{ (users | default([])) + [ ldap_sa_user ] }}"
 
     - name: Add LDAP Groups Grouping
       set_fact:
