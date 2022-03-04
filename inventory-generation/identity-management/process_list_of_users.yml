@@ -1,4 +1,6 @@
 ---
+- set_fact:
+    user_list: []
 
 - include_tasks: process_user.yml
   loop_control:
@@ -8,5 +10,6 @@
 - name: "Assemble final list of users"
   set_fact:
     processed_users: "{{ user_list.keys() | map('extract', user_list) | list | flatten | unique }}"
-  when: user_list is defined
+  when: 
+    - user_list | length > 0
 

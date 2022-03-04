@@ -56,16 +56,6 @@
         - "ocp-ldap-sa-credentials.json"
 
     #####################################################################################################################
-    # Process list of users that are part of this engagement
-    # 
-    - block:
-        - include_tasks: process_list_of_users.yml
-          vars:
-            list_of_users_to_process: "{{ engagement_users | d([]) }}"
-        - set_fact:
-            users: "{{ processed_users | d([]) }}"
-
-    #####################################################################################################################
     # Process list of users in the queue that needs to be removed
     # 
     - block:
@@ -75,6 +65,19 @@
             list_of_users_to_process: "{{ list_of_users_to_remove | d([]) }}"
         - set_fact:
             users_to_remove: "{{ processed_users | d([]) }}"
+
+        - debug:
+            var: users_to_remove
+
+    #####################################################################################################################
+    # Process list of users that are part of this engagement
+    # 
+    - block:
+        - include_tasks: process_list_of_users.yml
+          vars:
+            list_of_users_to_process: "{{ engagement_users | d([]) }}"
+        - set_fact:
+            users: "{{ processed_users | d([]) }}"
 
     #####################################################################################################################
     # Process user groups and group memberships

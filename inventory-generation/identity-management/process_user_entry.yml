@@ -21,6 +21,7 @@
       last_name: "{{ user_item.last_name|trim }}{{ name_append|d('') }}"
       email: "{{ user_item.email|trim }}"
       user_name: "{{ prefix }}{{ user_item.email.split('@')[0]|trim }}{{ suffix }}"
+      state: "{{ user_item.state | d('present') }}"
 
 - set_fact:
     user_list: "{{ user_list|d({})|combine({user_group: (user_list[user_group]|d([]) + [ new_user ]) }) }}"
