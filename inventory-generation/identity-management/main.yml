@@ -171,11 +171,6 @@
                 username: "{{ repository_username if repository_username is defined else omit }}"
                 password: "{{ repository_password if repository_password is defined else omit }}"
 
-        - name: "Add directory for group_vars/all"
-          file:
-            path: "{{ directory }}/iac/inventories/identity-management/inventory/group_vars"
-            state: directory
-
         - name: "Check For Existing Inventory File"
           stat:
             path: "{{ directory }}/iac/inventories/identity-management/inventory/group_vars/all.yml"
