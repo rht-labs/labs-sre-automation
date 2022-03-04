@@ -66,9 +66,6 @@
         - set_fact:
             users_to_remove: "{{ processed_users | d([]) }}"
 
-        - debug:
-            var: users_to_remove
-
     #####################################################################################################################
     # Process list of users that are part of this engagement
     # 
