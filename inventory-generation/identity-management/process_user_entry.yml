@@ -1,0 +1,27 @@
+---
+
+- set_fact:
+    name_append: ''
+
+- set_fact:
+    prefix: "{{ item.username_alteration.prefix | d('') }}"
+    suffix: "{{ item.username_alteration.suffix | d('') }}"
+  loop: "{{ user_options.user_roles.options }}"
+  when:
+    - user_group == item.value
+
+- set_fact:
+    name_append: " ({{ user_group }})"
+  when:
+    - prefix|trim != '' or suffix|trim != ''
+
+- set_fact:
+    new_user:
+      first_name: "{{ user_item.first_name|trim }}"
+      last_name: "{{ user_item.last_name|trim }}{{ name_append|d('') }}"
+      email: "{{ user_item.email|trim }}"
+      user_name: "{{ prefix }}{{ user_item.email.split('@')[0]|trim }}{{ suffix }}"
+      state: "{{ user_item.state | d('present') }}"
+
+- set_fact:
+    user_list: "{{ user_list|d({})|combine({user_group: (user_list[user_group]|d([]) + [ new_user ]) }) }}"

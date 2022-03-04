@@ -1,0 +1,6 @@
+---
+
+- name: "Set Group Membership"
+  set_fact:
+    user_groups: "{{ (user_groups | default([])) + [ {'name': group_item.value, 'members': (user_list[group_item.value] | map(attribute='user_name') | list) } ] }}"
+  when: user_list[group_item.value] is defined

@@ -1,4 +1,5 @@
 ---
+
 - name: Generate identity-management inventory based off of engagement.json
   hosts: local
   gather_facts: true
@@ -13,11 +14,35 @@
       include_vars:
         file: "{{ directory }}/engagement.json"
 
+    - name: Check if Runtime Data file exist
+      stat:
+        path: "{{ directory }}/runtime.json"
+      register: runtime_file_data
+
+    - name: Fail if runtime.json not found
+      fail:
+        msg: "The runtime.json file not found"
+      when: not runtime_file_data.stat.exists
+
+    - name: Read Runtime Data
+      include_vars:
+        file: "{{ directory }}/runtime.json"
+      when: runtime_file_data.stat.exists
+
     - name: "Fail If Governor Type Is Not Provided"
       fail:
         msg: "governor_type and governor_spec vars need to be provided in order to indicate babylon workflow"
       when:
         - (governor_type is undefined or (governor_type | trim) == "") or (governor_spec is undefined or (governor_spec | trim) == "")
+
+    - name: "Fail if user_options.user_roles.options Is Not Provided"
+      fail:
+        msg: "user_options.user_roles.options is not defined at runtime.json file or contain incorrect values"
+      when: >
+        user_options is undefined or 
+        user_options.user_roles is undefined or
+        user_options.user_roles.options is undefined or
+        user_options.user_roles.options[0].value is undefined
 
     - name: Generate Timestamp
       set_fact:
@@ -30,49 +55,83 @@
         - "ocp-admin-credentials.json"
         - "ocp-ldap-sa-credentials.json"
 
-    - name: "Add users to inventory"
-      set_fact:
-        users: "{{ (users | default([])) + [ { 'first_name': (item.first_name | trim), 'last_name': (item.last_name | trim), 'email': (item.email | trim) , 'user_name': (item.email.split('@')[0] | trim) } ] }}"
-      loop: "{{ engagement_users }}"
+    #####################################################################################################################
+    # Process list of users in the queue that needs to be removed
+    # 
+    - block:
+        - include_tasks: process_queue_list.yml
+        - include_tasks: process_list_of_users.yml
+          vars:
+            list_of_users_to_process: "{{ list_of_users_to_remove | d([]) }}"
+        - set_fact:
+            users_to_remove: "{{ processed_users | d([]) }}"
 
-    - name: "Add LDAP Service Account"
-      set_fact:
-        users: "{{ (users | default([])) + [ { 'first_name': 'LDAP', 'last_name': 'SA', 'email': 'ldap@localhost.com', 'user_name': ocp_ldap_sa_username, 'generate_password': False, 'notify_user': False, 'password': ocp_ldap_sa_password  } ] }}"
+    #####################################################################################################################
+    # Process list of users that are part of this engagement
+    # 
+    - block:
+        - include_tasks: process_list_of_users.yml
+          vars:
+            list_of_users_to_process: "{{ engagement_users | d([]) }}"
+        - set_fact:
+            users: "{{ processed_users | d([]) }}"
 
-    - name: "Get Unique Groups"
-      set_fact:
-        unique_groups: "{{ engagement_users | json_query('[].role') | unique }}"
+    #####################################################################################################################
+    # Process user groups and group memberships
+    # 
+    - include_tasks: process_groups.yml
+      loop_control:
+        loop_var: group_item
+      loop: "{{ user_options.user_roles.options }}"
 
-    - name: "Set Group Membership"
+    - name: "Get Unique Groups from runtime config"
       set_fact:
-        usrgrp: "{{ (usrgrp | default([])) + [ {'name': item, 'members': (engagement_users | selectattr('role','equalto',item) | map(attribute='email') | map('regex_replace','@.*','') | list) } ] }}"
-      loop: "{{ unique_groups }}"
+        unique_groups: "{{ user_options.user_roles.options | json_query('[].value') | unique }}"
+
+    #####################################################################################################################
+    # Add in the LDAP SA and group sync memberships
+    # 
+    - name: "Create a LDAP user and group facts to simplify processing below"
+      set_fact:
+        ldap_users:
+          - first_name: 'LDAP'
+            last_name: 'SA'
+            email: 'ldap@localhost.com'
+            user_name: "{{ ocp_ldap_sa_username }}"
+            password: "{{ ocp_ldap_sa_password }}"
+            generate_password: False
+            notify_user: False
+        ldap_groups:
+          - name: 'ldap-members'
+            childgroups: "{{ unique_groups }}"
+
+    - name: "Add LDAP Service Account to list of users"
+      set_fact:
+        users: "{{ (users | default([])) + ldap_users }}"
 
     - name: Add LDAP Groups Grouping
       set_fact:
-        usrgrp: "{{ (usrgrp | default([])) + [ {'name': 'ldap-members', 'childgroups': unique_groups } ] }}"
+        user_groups: "{{ (user_groups | default([])) + ldap_groups }}"
 
+
+    #####################################################################################################################
+    # Generate the CC list for emails
+    # 
     - name: "Set List of Mail CC"
       set_fact:
         cc_list: "{{ ', '.join(( '{{ engagement_lead_email }}', '{{ technical_lead_email }}' )) }}"
 
-    - name: "Check for Job queue"
-      ansible.builtin.stat:
-        path: "{{ directory }}/queue"
-      register: job_queue
-      ignore_errors: True
 
-    - name: "Process Job queue"
-      include: "queue/main.yml"
-      when:
-        - job_queue.stat.isdir is defined
-
+    #####################################################################################################################
+    # Gather repository facts for better processing below
+    # 
     - name: "Set repository information"
       set_fact:
         repository_url: "{{ url | default(omit) }}"
         repository_ssh_key: "{{ lookup('file', ssh_key_data_path, lstrip=False, rstrip=False) | default(omit) }}"
         repository_username: "{{ username if username is defined else omit }}"
         repository_password: "{{ password if password is defined else omit }}"
+
 
     #####################################################################################################################
     # Right now, the only supported configuration is a list of one hosting environment.
@@ -103,9 +162,9 @@
               list_of_mail_cc: "{{ cc_list }}"
               lodestar_identities:
                 users: "{{ users }}"
-                groups: "{{ usrgrp }}"
+                groups: "{{ user_groups }}"
               lodestar_identities_remove:
-                users: "{{ users_remove | default([]) }}"
+                users: "{{ users_to_remove | default([]) }}"
               repository:
                 url: "{{ repository_url if repository_url is defined else omit }}"
                 ssh_key: "{{ ( repository_ssh_key | to_nice_yaml( default_style='>-', indent=4, width=5000 ) | trim) if repository_ssh_key is defined else omit }}"

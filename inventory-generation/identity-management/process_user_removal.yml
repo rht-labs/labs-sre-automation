@@ -11,8 +11,9 @@
       last_name: "{{ last_name | trim }}"
       email: "{{ email | trim }}"
       user_name: "{{ email.split('@')[0] | trim }}"
+      role: "{{ role | trim }}"
       state: "absent"
 
 - name: "Add User to removal queue"
   set_fact:
-    users_remove: "{{ (users_remove | default([])) + [ user_info ] }}"
+    list_of_users_to_remove: "{{ (list_of_users_to_remove | d([])) + [ user_info ] }}"
