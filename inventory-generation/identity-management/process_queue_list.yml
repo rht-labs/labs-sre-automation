@@ -21,5 +21,6 @@
   with_items:
     - "{{ jobs_user_management.files }}"
   when:
-    - jobs_user_management is defined
+    - jobs_user_management.matched is defined
+    - jobs_user_management.matched > 0
 
