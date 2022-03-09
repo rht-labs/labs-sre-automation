@@ -27,6 +27,12 @@ internal:
 {%- endif %}
 
 {% if users %}
+engagement_leads:
+  list_of_users:
+{% for user in users %}
+    - email: {{ user }}
+{% endfor %}
+
 list_of_mail_cc:
 {% for user in users %}
   - {{ user }}
