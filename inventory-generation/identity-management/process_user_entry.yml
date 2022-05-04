@@ -2,6 +2,7 @@
 
 - set_fact:
     name_append: ''
+    username_regex: '[\!$&*-=^\`|~#%+/?{}]'
 
 - set_fact:
     prefix: "{{ item.username_alteration.prefix | d('') }}"
@@ -20,7 +21,7 @@
       first_name: "{{ user_item.first_name|trim }}"
       last_name: "{{ user_item.last_name|trim }}{{ name_append|d('') }}"
       email: "{{ user_item.email|trim }}"
-      user_name: "{{ prefix }}{{ user_item.email.split('@')[0]|trim }}{{ suffix }}"
+      user_name: "{{ prefix }}{{ user_item.email.split('@')[0]|trim|regex_replace(username_regex, '_') }}{{ suffix }}"
       state: "{{ user_item.state | d('present') }}"
 
 - set_fact:
