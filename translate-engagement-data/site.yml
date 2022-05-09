@@ -27,7 +27,6 @@
           file:
             path: "{{ directory }}/ocp-init"
             state: directory
-        - name: 
         - name: Create Resource Claim
           vars:
             claim_content:
