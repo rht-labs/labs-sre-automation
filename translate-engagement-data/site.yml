@@ -27,9 +27,16 @@
           file:
             path: "{{ directory }}/ocp-init"
             state: directory
+        - name: Get allowed AZs per region and randomize the choice
+          set_fact:
+             choosen_zone: "{{ aws-region-zones[hosting_environments[0].ocp_cloud_provider_region] | random }}:
+          when:
+            - hosting_environments is defined
+            - hosting_environments|length > 0
+            - hosting_environments[0].ocp_aws_machineset_zones is not defined
         - name: Set default AZ list if not already defined
-          set_fact: 
-              hosting_environments[0].ocp_aws_machineset_zones[0]: "{{ hosting_environments[0].ocp_cloud_provider_region + 'a' }}"
+          set_fact:
+              hosting_environments[0].ocp_aws_machineset_zones[0]: "{{ hosting_environments[0].ocp_cloud_provider_region  }}"+"{{ choosen_zone }}"
           when:
             - hosting_environments is defined
             - hosting_environments|length > 0
@@ -48,7 +55,9 @@
               ocp_ldap_sa_user: "{{ ocp_ldap_sa_username }}"
               ocp_ldap_sa_password: "{{ ocp_ldap_sa_password }}"
               ocp_subdomain: "{{ hosting_environments[0].ocp_sub_domain }}"
-              openshift_machineset_aws_zones: "{{ hosting_environments[0].ocp_aws_machineset_zones }}"
+              aws_availability_zone: "{{ hosting_environments[0].ocp_aws_machineset_zones[0] }}"
+              openshift_controlplane_aws_zones_odcr: "{{ hosting_environments[0].ocp_aws_machineset_zones }}"
+              openshift_machineset_aws_zones_odcr: "{{ hosting_environments[0].ocp_aws_machineset_zones }}"
           copy:
             content: "{{ lookup('template', inventory_dir + '/../files/templates/resourceclaim.yaml.j2') }}"
             dest: "{{ directory }}/ocp-init/cluster-init.yaml"
@@ -57,4 +66,3 @@
       when:
         - hosting_environments is defined
         - hosting_environments|length > 0
-      
