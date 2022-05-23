@@ -36,7 +36,9 @@
             - hosting_environments[0].ocp_aws_machineset_zones is not defined
         - name: Set default AZ list if not already defined
           set_fact:
-              hosting_environments[0].ocp_aws_machineset_zones[0]: "{{ hosting_environments[0].ocp_cloud_provider_region  }}"+"{{ choosen_zone }}"
+              hosting_environments:
+                - ocp_aws_machineset_zones:
+                    - "{{ hosting_environments[0].ocp_cloud_provider_region  }}"+"{{ choosen_zone }}"
           when:
             - hosting_environments is defined
             - hosting_environments|length > 0
