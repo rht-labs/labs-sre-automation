@@ -28,6 +28,12 @@ ansible_tower:
       project: "infra-ansible"
       playbook: "playbooks/notifications/email-notify-list-of-users.yml"
       ask_variables_on_launch: true
+    - name: "{{ customer_engagement }}-remove-openshift-objects"
+      description: "Job Template to remove OpenShift ArgoCD Application and ResourceClaim"
+      inventory: "{{ customer_engagement }}-tower-mail-host"
+      project: "infra-ansible"
+      playbook: "playbooks/openshift-manage-objects-via-exec.yml"
+      ask_variables_on_launch: true
   inventories:
     - name: "{{ customer_engagement }}-tower-mail-host"
       variables: ""
@@ -51,7 +57,16 @@ ansible_tower:
           update_on_launch: true
           source_vars: |-
             ---
-
+  workflow_templates:
+    - name: "{{ customer_engagement }}-env-termination-workflow"
+      description: "Workflow Template for removal of Engagement environment"
+      ask_variables_on_launch: true
+      nodes:
+        - unified_job_template:
+            name: "{{ customer_engagement }}-remove-openshift-objects"
+          success_nodes:
+            - unified_job_template:
+                name: "{{ customer_engagement }}-email-notify-list-of-users"
   schedules:
     - name: "{{ customer_engagement }}-welcome-internal"
       description: "Welcome Internal for internal {{ company_name }} engagement members"
@@ -89,15 +104,28 @@ ansible_tower:
         title: {% raw %}"{{ shutoff_reminder.title }}"{% endraw %}
         list_of_users: {% raw %}"{{ internal.list_of_users | default([]) }}"{% endraw %}
         list_of_mail_cc: {% raw %}"{{ list_of_mail_cc | default([]) }}"{% endraw %}
-    - name: "{{ customer_engagement }}-shutoff"
-      description: "Shutoff e-mail for the {{ customer_engagement }} engagement"
+    - name: "{{ customer_engagement }}-environment-termination"
+      description: "Environment termination for the {{ customer_engagement }} engagement"
       {% raw -%}
       rrule: "{{ archive_date | parse_datetime | replace_datetime(hour=5) | to_rrule(timezone=timezone) }}"
       {%- endraw %}
-      unified_job_template: "{{ customer_engagement }}-email-notify-list-of-users"
+      unified_job_template: "{{ customer_engagement }}-termination-workflow"
       enabled: {{ enable_notifications | default(false) }}
       extra_data:
         body: {% raw %}"{{ shutoff.body }}"{% endraw %}
         title: {% raw %}"{{ shutoff.title }}"{% endraw %}
         list_of_users: {% raw %}"{{ internal.list_of_users | default([]) }}"{% endraw %}
         list_of_mail_cc: {% raw %}"{{ list_of_mail_cc | default([]) }}"{% endraw %}
+        openshift_manage_objects:
+          - name: "gitlab-app-{{ project_id }}"
+            executable: "oc"
+            kind: "Application"
+            namespace: "lodestar-argo-cd"
+            api_version: argoproj.io/v1alpha1
+            action: delete
+          - name: "do500.ocp4.{{ engagement_region | default('dev') }}-{{ project_id }}"
+            executable: "oc"
+            kind: "ResourceClaim"
+            namespace: "lodestar-babylon-operators"
+            api_version: "poolboy.gpte.redhat.com/v1"
+            action: delete
