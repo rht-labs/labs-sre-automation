@@ -13,7 +13,7 @@
       when:
         - (governor_type is undefined or (governor_type | trim) == "") or (governor_spec is undefined or (governor_spec | trim) == "")
     - block:
-      - name: Set fact used to check if a hosting environment is needed
+      - name: Set default values and fact used to check if a hosting environment is needed
         set_fact:
           ocp_cloud_provider_name: "{{ hosting_environments[0].ocp_cloud_provider_name | default('other') }}"
           single_az_zone: "true"
