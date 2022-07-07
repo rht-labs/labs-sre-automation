@@ -16,6 +16,7 @@
       - name: Set fact used to check if a hosting environment is needed
         set_fact:
           ocp_cloud_provider_name: "{{ hosting_environments[0].ocp_cloud_provider_name | default('other') }}"
+          single_az_zone: "true"
       - block:
         - name: Read credentials
           include_vars:
@@ -29,11 +30,10 @@
             state: directory
         - name: Check what AZ scheme is to be used
           set_fact:
-             go_with_one_az: "true"
+             single_az_zone: "false"
           when:
-            - hosting_environments is defined
-            - hosting_environments|length > 0
-            - (hosting_environments[0].ocp_cloud_provider_availability_zone | trim) == "one"
+            - hosting_environments[0].ocp_cloud_provider_availability_zone is defined
+            - hosting_environments[0].ocp_cloud_provider_availability_zone|trim|lower != "one"
         - name: Create Resource Claim
           vars:
             claim_content:
@@ -48,8 +48,8 @@
               ocp_ldap_sa_user: "{{ ocp_ldap_sa_username }}"
               ocp_ldap_sa_password: "{{ ocp_ldap_sa_password }}"
               ocp_subdomain: "{{ hosting_environments[0].ocp_sub_domain }}"
-              agnosticd_aws_capacity_reservation_enable: "{{ go_with_one_az | default('false') }}"
-              agnosticd_aws_capacity_reservation_single_zone: "{{ go_with_one_az | default('false') }}"
+              agnosticd_aws_capacity_reservation_enable: "{{ single_az_zone }}"
+              agnosticd_aws_capacity_reservation_single_zone: "{{ single_az_zone }}"
           copy:
             content: "{{ lookup('template', inventory_dir + '/../files/templates/resourceclaim.yaml.j2') }}"
             dest: "{{ directory }}/ocp-init/cluster-init.yaml"
