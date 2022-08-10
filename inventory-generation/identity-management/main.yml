@@ -67,6 +67,13 @@
             users_to_remove: "{{ processed_users | d([]) }}"
 
     #####################################################################################################################
+    # Create generic users 
+    # 
+
+    - block: 
+        - include: create_generic_users 
+
+    #####################################################################################################################
     # Process list of users that are part of this engagement
     # 
     - block:
@@ -112,6 +119,23 @@
     - name: Add LDAP Groups Grouping
       set_fact:
         user_groups: "{{ (user_groups | default([])) + ldap_groups }}"
+
+
+    - name: Create generic accounts
+      set_fact: 
+        generic_accounts:
+          - first_name: 'lab%02x'
+            last_name: 'lab%02x'
+            email: 'lab%02x@localhost.com'
+            user_name: "lab%02x"
+            password: "lab%02x"
+            generate_password: False
+            notify_user: False
+      with_sequence: start=0 end={{ number_of_generic_accounts | default(5) }} format=lab%02x
+
+    - name: Add generic accounts to the user list
+      set_fact: 
+        users: "{{ (users | default([])) + generic_accounts }}"
 
 
     #####################################################################################################################
