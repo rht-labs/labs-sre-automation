@@ -39,7 +39,7 @@
       fail:
         msg: "user_options.user_roles.options is not defined at runtime.json file or contain incorrect values"
       when: >
-        user_options is undefined or 
+        user_options is undefined or
         user_options.user_roles is undefined or
         user_options.user_roles.options is undefined or
         user_options.user_roles.options[0].value is undefined
@@ -113,19 +113,10 @@
       set_fact:
         user_groups: "{{ (user_groups | default([])) + ldap_groups }}"
 
-
     - name: Create generic accounts
-      set_fact:
-        generic_accounts:
-          - first_name: 'lab%02x'
-            last_name: 'lab%02x'
-            email: 'lab%02x@localhost.com'
-            user_name: "lab%02x"
-            password: "lab%02x"
-            generate_password: False
-            notify_user: False
-      with_sequence: start=0 end={{ number_of_generic_accounts | default(5) }} format=lab%02x
-
+      include_tasks: create_generic_accounts.yml
+      loop: "{{ range(0,5,1)|list }}"
+## how to inject variable as a range filter param? 
     - name: Add generic accounts to the user list
       set_fact:
         users: "{{ (users | default([])) + generic_accounts }}"
