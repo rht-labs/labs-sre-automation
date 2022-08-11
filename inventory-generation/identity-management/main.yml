@@ -113,13 +113,38 @@
       set_fact:
         user_groups: "{{ (user_groups | default([])) + ldap_groups }}"
 
+
+    #####################################################################################################################
+    # Create generic user accounts
+    #
+
     - name: Create generic accounts
-      include_tasks: create_generic_accounts.yml
-      loop: "{{ range(0,5,1)|list }}"
-## how to inject variable as a range filter param? 
+      set_fact:
+        generic_accounts: >-
+          {{ generic_accounts|d([]) +
+            [{
+              'first_name': 'lab' + item|string,
+              'last_name': 'lab' + item|string,
+              'email': 'lab' + item|string + '@localhost.com',
+              'user_name': 'lab' + item|string,
+              'password': 'lab' + item|string,
+              'generate_password': False,
+              'notify_user': False
+            }]
+          }}
+        user_names: "{{ user_names|d([]) + [ generic_accounts_base_name|d('lab')|string + item|string ] }}"
+      loop: "{{ range(1, number_of_generic_accounts+1)|list }}"
+
+    - set_fact:
+       generic_accounts_group: "{{ [{'name': generic_accounts_group_name|d('student')|string, 'members': user_names}] }}"
+
+    - debug:
+        var: group_members
+
     - name: Add generic accounts to the user list
       set_fact:
         users: "{{ (users | default([])) + generic_accounts }}"
+        user_groups: "{{ (user_groups | default([])) + generic_accounts_group }}"
 
 
     #####################################################################################################################
