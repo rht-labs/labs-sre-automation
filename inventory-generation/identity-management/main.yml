@@ -39,7 +39,7 @@
       fail:
         msg: "user_options.user_roles.options is not defined at runtime.json file or contain incorrect values"
       when: >
-        user_options is undefined or 
+        user_options is undefined or
         user_options.user_roles is undefined or
         user_options.user_roles.options is undefined or
         user_options.user_roles.options[0].value is undefined
@@ -112,6 +112,39 @@
     - name: Add LDAP Groups Grouping
       set_fact:
         user_groups: "{{ (user_groups | default([])) + ldap_groups }}"
+
+
+    #####################################################################################################################
+    # Create generic user accounts
+    #
+
+    - name: Create generic accounts
+      set_fact:
+        generic_accounts: >-
+          {{ generic_accounts|d([]) +
+            [{
+              'first_name': 'lab' + item|string,
+              'last_name': 'lab' + item|string,
+              'email': 'lab' + item|string + '@localhost.com',
+              'user_name': 'lab' + item|string,
+              'password': 'lab' + item|string,
+              'generate_password': False,
+              'notify_user': False
+            }]
+          }}
+        user_names: "{{ user_names|d([]) + [ generic_accounts_base_name|d('lab')|string + item|string ] }}"
+      loop: "{{ range(1, number_of_generic_accounts+1)|list }}"
+
+    - set_fact:
+       generic_accounts_group: "{{ [{'name': generic_accounts_group_name|d('student')|string, 'members': user_names}] }}"
+
+    - debug:
+        var: group_members
+
+    - name: Add generic accounts to the user list
+      set_fact:
+        users: "{{ (users | default([])) + generic_accounts }}"
+        user_groups: "{{ (user_groups | default([])) + generic_accounts_group }}"
 
 
     #####################################################################################################################
