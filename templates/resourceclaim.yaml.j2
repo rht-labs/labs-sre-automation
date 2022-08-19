@@ -4,6 +4,9 @@ apiVersion: poolboy.gpte.redhat.com/v1
 kind: ResourceClaim
 metadata:
   name: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower ) }}-{{ project_id }}
+  labels:
+    "babylon.gpte.redhat.com/catalogItemName": do500.ocp4.dev
+    "babylon.gpte.redhat.com/catalogItemNamespace": openshift
 spec:
   resources:
   - provider:
