@@ -13,7 +13,7 @@ spec:
       apiVersion: poolboy.gpte.redhat.com/v1
       kind: ResourceProvider
       name: {{ (engagement_type | lower) + '.' + (governor_type | lower) + '.' + (governor_spec | lower) }}
-      namespace: lodestar-babylon-operators
+      namespace: babylon-operators
     template:
       spec:
         vars:
